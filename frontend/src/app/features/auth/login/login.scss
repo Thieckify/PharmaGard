@@ -1,0 +1,180 @@
+.login-page {
+  display: flex;
+  min-height: 100vh;
+  background: var(--pg-surface-0);
+}
+
+/* Panneau gauche — branding */
+.login-brand {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: var(--pg-space-2xl);
+  background: linear-gradient(135deg, var(--pg-primary-700) 0%, var(--pg-primary-900) 100%);
+  color: white;
+  position: relative;
+  overflow: hidden;
+
+  /* Motif décoratif subtil en arrière-plan */
+  &::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -20%;
+    width: 500px;
+    height: 500px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.06) 0%, transparent 70%);
+    pointer-events: none;
+  }
+}
+
+.brand-header {
+  display: flex;
+  align-items: center;
+  gap: var(--pg-space-sm);
+  z-index: 1;
+}
+
+.logo-mark {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--pg-radius-md);
+  background: white;
+  color: var(--pg-primary-700);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  svg {
+    width: 24px;
+    height: 24px;
+  }
+}
+
+.logo-text {
+  font-size: 1.125rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.brand-content {
+  z-index: 1;
+  max-width: 480px;
+
+  h1 {
+    color: white;
+    font-size: 2.5rem;
+    line-height: 1.15;
+    font-weight: 600;
+    margin-bottom: var(--pg-space-lg);
+  }
+
+  .tagline {
+    font-size: 1.0625rem;
+    line-height: 1.6;
+    color: rgba(255, 255, 255, 0.75);
+    margin: 0;
+
+    .accent {
+      color: var(--pg-accent-gold);
+      font-weight: 500;
+    }
+  }
+}
+
+.brand-footer {
+  font-size: 0.875rem;
+  color: rgba(255, 255, 255, 0.5);
+  z-index: 1;
+}
+
+/* Panneau droit — formulaire */
+.login-form-panel {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--pg-space-2xl);
+}
+
+.login-form-container {
+  width: 100%;
+  max-width: 400px;
+}
+
+.form-header {
+  margin-bottom: var(--pg-space-xl);
+
+  h2 {
+    font-size: 1.75rem;
+    margin-bottom: var(--pg-space-xs);
+  }
+
+  p {
+    color: var(--pg-surface-500);
+    margin: 0;
+  }
+}
+
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--pg-space-lg);
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--pg-space-xs);
+
+  label {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--pg-surface-700);
+  }
+
+  /* Force les inputs PrimeNG à prendre toute la largeur */
+  :is(input, .p-password) {
+    width: 100%;
+  }
+}
+
+.submit-btn {
+  margin-top: var(--pg-space-xs);
+}
+
+.form-footer {
+  text-align: center;
+  margin-top: var(--pg-space-xl);
+  font-size: 0.875rem;
+  color: var(--pg-surface-500);
+
+  .form-link {
+    color: var(--pg-primary-600);
+    text-decoration: none;
+    font-weight: 500;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+}
+
+/* Point doré signature — petit détail qui identifie la marque PharmaGarde */
+.logo-dot {
+  color: var(--pg-accent-gold);
+  margin-left: 2px;
+}
+
+.accent-dot {
+  color: var(--pg-accent-gold);
+}
+
+/* Responsive : masquer le panneau branding sur mobile */
+@media (max-width: 900px) {
+  .login-brand {
+    display: none;
+  }
+}

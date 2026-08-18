@@ -1,0 +1,71 @@
+<div class="login-page">
+
+    <!-- Panneau gauche : branding, accroche, ambiance -->
+    <aside class="login-brand">
+        <div class="brand-header">
+            <div class="logo-mark">
+                <!-- Croix pharmacie, style Dakar/Sénégal -->
+                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                    <path
+                        d="M9 3h6a1 1 0 0 1 1 1v4h4a1 1 0 0 1 1 1v6a1 1 0 0 1-1 1h-4v4a1 1 0 0 1-1 1H9a1 1 0 0 1-1-1v-4H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1h4V4a1 1 0 0 1 1-1z"
+                        fill="currentColor" />
+                </svg>
+            </div>
+            <span class="logo-text">PharmaGarde<span class="logo-dot">.</span></span>
+        </div>
+
+        <div class="brand-content">
+            <h1>Trouvez une pharmacie de garde<br>en quelques secondes<span class="accent-dot">.</span></h1>
+            <p class="tagline">
+                La plateforme de <span class="accent">référence</span> pour les pharmacies de garde à Dakar.
+                Gérez votre planning, atteignez <span class="accent">plus de patients</span>.
+            </p>
+        </div>
+
+        <footer class="brand-footer">
+            <span>&copy; 2026 PharmaGarde — EPF Africa</span>
+        </footer>
+    </aside>
+
+    <!-- Panneau droit : formulaire -->
+    <main class="login-form-panel">
+        <div class="login-form-container">
+
+            <header class="form-header">
+                <h2>Connexion</h2>
+                <p>Accédez à votre espace personnel PharmaGarde.</p>
+            </header>
+
+            <form (ngSubmit)="onSubmit()" class="login-form">
+
+                <div class="field">
+                    <label for="email">Email</label>
+                    <input pInputText id="email" name="email" type="email" [(ngModel)]="email" required
+                        autocomplete="email" placeholder="votre.email@pharmagarde.sn" />
+                </div>
+
+                <div class="field">
+                    <label for="password">Mot de passe</label>
+                    <p-password id="password" name="password" [(ngModel)]="password" [feedback]="false"
+                        [toggleMask]="true" [inputStyle]="{ width: '100%' }" styleClass="w-full" required
+                        placeholder="••••••••" />
+                </div>
+
+                @if (errorMessage()) {
+                <p-message severity="error" styleClass="w-full">
+                    {{ errorMessage() }}
+                </p-message>
+                }
+
+                <p-button type="submit" label="Se connecter" [loading]="loading()" styleClass="w-full submit-btn" />
+            </form>
+
+            <p class="form-footer">
+                Vous cherchez une pharmacie de garde ?
+                <a routerLink="/public/gardes" class="form-link">Accédez à l'espace public</a>
+            </p>
+
+        </div>
+    </main>
+
+</div>
