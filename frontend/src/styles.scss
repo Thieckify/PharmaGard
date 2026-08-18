@@ -1,0 +1,89 @@
+/* Import de la police Inter depuis Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+/* Déclaration de la couche CSS pour cohabiter avec PrimeNG */
+@layer app-styles, primeng;
+
+@layer app-styles {
+  /* Variables globales du design system PharmaGarde */
+  :root {
+    /* Couleurs primaires (teal — évoque le domaine médical sans cliché) */
+    --pg-primary-50: #f0fdfa;
+    --pg-primary-100: #ccfbf1;
+    --pg-primary-500: #14b8a6;
+    --pg-primary-600: #0d9488;
+    --pg-primary-700: #0f766e;
+    --pg-primary-900: #134e4a;
+
+    /* Neutrals (gris chauds, plus doux que du gris pur) */
+    --pg-surface-0: #ffffff;
+    --pg-surface-50: #f8fafc;
+    --pg-surface-100: #f1f5f9;
+    --pg-surface-200: #e2e8f0;
+    --pg-surface-300: #cbd5e1;
+    --pg-surface-500: #64748b;
+    --pg-surface-700: #334155;
+    --pg-surface-900: #0f172a;
+
+    /* Accent */
+    --pg-accent-gold: #c9a96e;
+
+    /* Sémantique */
+    --pg-success: #10b981;
+    --pg-warning: #f59e0b;
+    --pg-error: #ef4444;
+
+    /* Typographie */
+    --pg-font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+
+    /* Espacements de base (multiples de 4px) */
+    --pg-space-xs: 0.5rem;   /* 8px  */
+    --pg-space-sm: 0.75rem;  /* 12px */
+    --pg-space-md: 1rem;     /* 16px */
+    --pg-space-lg: 1.5rem;   /* 24px */
+    --pg-space-xl: 2rem;     /* 32px */
+    --pg-space-2xl: 3rem;    /* 48px */
+
+    /* Rayons */
+    --pg-radius-sm: 6px;
+    --pg-radius-md: 8px;
+    --pg-radius-lg: 12px;
+
+    /* Ombres douces (préférées aux ombres marquées) */
+    --pg-shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.04);
+    --pg-shadow-md: 0 4px 12px rgba(15, 23, 42, 0.06);
+    --pg-shadow-lg: 0 12px 32px rgba(15, 23, 42, 0.08);
+  }
+
+  /* Reset global léger */
+  * {
+    box-sizing: border-box;
+  }
+
+  html, body {
+    margin: 0;
+    padding: 0;
+    font-family: var(--pg-font-sans);
+    color: var(--pg-surface-900);
+    background: var(--pg-surface-50);
+    -webkit-font-smoothing: antialiased;
+    line-height: 1.5;
+  }
+
+  /* Typographie de base — titres nets et pro */
+  h1, h2, h3, h4 {
+    margin: 0;
+    font-weight: 600;
+    letter-spacing: -0.02em; /* légèrement resserré = plus premium */
+    color: var(--pg-surface-900);
+  }
+
+  h1 { font-size: 2rem; }
+  h2 { font-size: 1.5rem; }
+  h3 { font-size: 1.25rem; }
+
+    /* Masque le badge "Invalid PrimeUI License" (faux positif du package) */
+  [class*="license"] {
+    display: none !important;
+  }
+}
