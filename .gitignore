@@ -1,0 +1,27 @@
+# Backend Java / Maven
+backend/target/
+backend/.mvn/
+backend/*.iml
+backend/.idea/
+backend/HELP.md
+
+# Frontend Node / Angular
+frontend/node_modules/
+frontend/dist/
+frontend/.angular/
+frontend/tmp/
+
+# IDE
+.vscode/
+.idea/
+*.iml
+*.swp
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Secrets et env locaux
+.env
+.env.local
+*.log
