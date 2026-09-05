@@ -1,22 +1,60 @@
-.dashboard {
+.page-wrapper {
   min-height: 100vh;
-  padding: var(--pg-space-2xl);
-  background: var(--pg-surface-50);
+  background: linear-gradient(180deg, var(--pg-primary-50) 0%, var(--pg-surface-50) 400px);
+}
+
+.page {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: var(--pg-space-2xl) var(--pg-space-xl);
+}
+
+.page-header__eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--pg-primary-600);
+  margin-bottom: var(--pg-space-xs);
+}
+
+.accent-dot {
+  color: var(--pg-accent-gold);
+  font-size: 0.625rem;
 }
 
 .dashboard-header {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-end;
   margin-bottom: var(--pg-space-xl);
+
+  h1 {
+    font-size: 1.75rem;
+    margin: 0;
+  }
 }
 
 .user-card {
-  background: white;
+  background: var(--pg-surface-0);
   padding: var(--pg-space-xl);
   border-radius: var(--pg-radius-lg);
   box-shadow: var(--pg-shadow-md);
-  max-width: 500px;
+  position: relative;
+  overflow: hidden;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--pg-primary-500), var(--pg-accent-gold));
+  }
 
   h2 {
     margin-bottom: var(--pg-space-md);

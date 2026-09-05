@@ -1,23 +1,30 @@
-<div class="dashboard">
-  <header class="dashboard-header">
-    <h1>Bienvenue sur PharmaGarde</h1>
-    <p-button label="Se déconnecter" severity="secondary" (onClick)="logout()" />
-  </header>
+<div class="page-wrapper">
+  <div class="page">
+    <header class="dashboard-header">
+      <div>
+        <div class="page-header__eyebrow">
+          <span class="accent-dot">●</span> Tableau de bord
+        </div>
+        <h1>Bienvenue sur PharmaGarde</h1>
+      </div>
+      <p-button label="Se déconnecter" severity="secondary" (onClick)="logout()" />
+    </header>
 
-  @if (authService.currentUser(); as user) {
-    <section class="user-card">
-      <h2>Vous êtes connecté</h2>
-      <ul>
-        <li><strong>Email :</strong> {{ user.email }}</li>
-        <li><strong>Rôle :</strong> {{ user.role }}</li>
-        <li><strong>User ID :</strong> {{ user.userId }}</li>
-        @if (user.tenantId) {
-          <li><strong>Tenant ID :</strong> {{ user.tenantId }} (pharmacie)</li>
-        }
-        @if (user.zoneId) {
-          <li><strong>Zone ID :</strong> {{ user.zoneId }}</li>
-        }
-      </ul>
-    </section>
-  }
+    @if (authService.currentUser(); as user) {
+      <section class="user-card">
+        <h2>Vous êtes connecté</h2>
+        <ul>
+          <li><strong>Email :</strong> {{ user.email }}</li>
+          <li><strong>Rôle :</strong> {{ user.role }}</li>
+          <li><strong>User ID :</strong> {{ user.userId }}</li>
+          @if (user.tenantId) {
+            <li><strong>Tenant ID :</strong> {{ user.tenantId }} (pharmacie)</li>
+          }
+          @if (user.zoneId) {
+            <li><strong>Zone ID :</strong> {{ user.zoneId }}</li>
+          }
+        </ul>
+      </section>
+    }
+  </div>
 </div>
