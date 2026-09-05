@@ -1,0 +1,40 @@
+<div class="page-wrapper">
+  <div class="page">
+    <header class="page-header">
+      <div class="page-header__eyebrow">
+        <span class="accent-dot">●</span> Pharmacies
+      </div>
+      <h1>Vos pharmacies</h1>
+      <p class="page-header__subtitle">Fiches enregistrées sur la plateforme, filtrées selon votre rôle.</p>
+    </header>
+
+    @if (chargement()) {
+      <p class="etat-info">Chargement des pharmacies...</p>
+    } @else if (erreur()) {
+      <p class="etat-erreur">{{ erreur() }}</p>
+    } @else if (pharmacies().length === 0) {
+      <div class="etat-vide">
+        <p>Aucune pharmacie à afficher pour l'instant.</p>
+      </div>
+    } @else {
+      <div class="liste-pharmacies">
+        @for (pharmacie of pharmacies(); track pharmacie.id) {
+          <article class="carte-pharmacie">
+            <div class="carte-pharmacie__top">
+              <h3>{{ pharmacie.nom }}</h3>
+              <span class="statut" [class.statut--active]="pharmacie.active">
+                <span class="statut__point"></span>
+                {{ pharmacie.active ? 'Validée' : 'En attente' }}
+              </span>
+            </div>
+            <p class="carte-pharmacie__adresse">{{ pharmacie.adresse }}</p>
+            <div class="carte-pharmacie__meta">
+              <span>{{ pharmacie.nomQuartier }} · {{ pharmacie.nomZone }}</span>
+              <span>{{ pharmacie.horaireOuverture }} – {{ pharmacie.horaireFermeture }}</span>
+            </div>
+          </article>
+        }
+      </div>
+    }
+  </div>
+</div>

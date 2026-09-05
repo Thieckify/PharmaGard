@@ -1,0 +1,145 @@
+.page-wrapper {
+  min-height: 100vh;
+  background: linear-gradient(180deg, var(--pg-primary-50) 0%, var(--pg-surface-50) 400px);
+}
+
+.page {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: var(--pg-space-2xl) var(--pg-space-xl);
+}
+
+.page-header {
+  margin-bottom: var(--pg-space-xl);
+
+  &__eyebrow {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--pg-primary-600);
+    margin-bottom: var(--pg-space-xs);
+  }
+
+  h1 {
+    font-size: 2rem;
+    margin-bottom: var(--pg-space-xs);
+  }
+
+  &__subtitle {
+    color: var(--pg-surface-500);
+    margin: 0;
+  }
+}
+
+.accent-dot {
+  color: var(--pg-accent-gold);
+  font-size: 0.625rem;
+}
+
+.liste-pharmacies {
+  display: grid;
+  gap: var(--pg-space-md);
+}
+
+.carte-pharmacie {
+  background: var(--pg-surface-0);
+  border: 1px solid var(--pg-surface-200);
+  border-radius: var(--pg-radius-lg);
+  box-shadow: var(--pg-shadow-sm);
+  padding: var(--pg-space-lg);
+  position: relative;
+  overflow: hidden;
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--pg-primary-500), var(--pg-accent-gold));
+  }
+
+  &:hover {
+    box-shadow: var(--pg-shadow-md);
+    transform: translateY(-1px);
+  }
+
+  &__top {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--pg-space-md);
+    margin-bottom: var(--pg-space-xs);
+
+    h3 {
+      font-size: 1.125rem;
+    }
+  }
+
+  &__adresse {
+    color: var(--pg-surface-500);
+    font-size: 0.9375rem;
+    margin: 0 0 var(--pg-space-sm);
+  }
+
+  &__meta {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.8125rem;
+    color: var(--pg-surface-500);
+    border-top: 1px solid var(--pg-surface-100);
+    padding-top: var(--pg-space-sm);
+  }
+}
+
+.statut {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  white-space: nowrap;
+  background: var(--pg-surface-100);
+  color: var(--pg-surface-700);
+
+  &__point {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--pg-warning);
+  }
+
+  &--active {
+    background: rgba(16, 185, 129, 0.1);
+    color: var(--pg-success);
+
+    .statut__point {
+      background: var(--pg-success);
+    }
+  }
+}
+
+.etat-info,
+.etat-erreur {
+  color: var(--pg-surface-500);
+}
+
+.etat-erreur {
+  color: var(--pg-error);
+}
+
+.etat-vide {
+  text-align: center;
+  padding: var(--pg-space-2xl) 0;
+  color: var(--pg-surface-500);
+  border: 1px dashed var(--pg-surface-300);
+  border-radius: var(--pg-radius-lg);
+}

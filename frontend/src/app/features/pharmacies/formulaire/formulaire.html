@@ -1,0 +1,95 @@
+<div class="page-wrapper">
+  <div class="page">
+    <header class="page-header">
+      <div class="page-header__eyebrow">
+        <span class="accent-dot">●</span> Ma pharmacie
+      </div>
+      <h1>Fiche de votre pharmacie</h1>
+      <p class="page-header__subtitle">Ces informations seront visibles après validation par un superviseur.</p>
+    </header>
+
+    <form [formGroup]="formulaire" (ngSubmit)="onSubmit()" class="carte-formulaire">
+
+      <div class="champ">
+        <label for="nom">Nom de la pharmacie</label>
+        <input id="nom" type="text" formControlName="nom" />
+        @if (formulaire.get('nom')?.invalid && formulaire.get('nom')?.touched) {
+          <p class="erreur-champ">Le nom est obligatoire.</p>
+        }
+      </div>
+
+      <div class="champ">
+        <label for="adresse">Adresse</label>
+        <input id="adresse" type="text" formControlName="adresse" />
+        @if (formulaire.get('adresse')?.invalid && formulaire.get('adresse')?.touched) {
+          <p class="erreur-champ">L'adresse est obligatoire.</p>
+        }
+      </div>
+
+      <div class="champ-groupe">
+        <div class="champ">
+          <label for="zoneId">Zone</label>
+          <select id="zoneId" formControlName="zoneId">
+            <option [ngValue]="null">-- Choisir --</option>
+            @for (zone of zones(); track zone.id) {
+              <option [ngValue]="zone.id">{{ zone.nom }}</option>
+            }
+          </select>
+          @if (formulaire.get('zoneId')?.invalid && formulaire.get('zoneId')?.touched) {
+            <p class="erreur-champ">Obligatoire.</p>
+          }
+        </div>
+
+        <div class="champ">
+          <label for="quartierId">Quartier</label>
+          <select id="quartierId" formControlName="quartierId">
+            <option [ngValue]="null">-- Choisir --</option>
+            @for (quartier of quartiersFiltres(); track quartier.id) {
+              <option [ngValue]="quartier.id">{{ quartier.nom }}</option>
+            }
+          </select>
+          @if (formulaire.get('quartierId')?.invalid && formulaire.get('quartierId')?.touched) {
+            <p class="erreur-champ">Obligatoire.</p>
+          }
+        </div>
+      </div>
+
+      <div class="champ">
+        <label for="telephone">Téléphone</label>
+        <input id="telephone" type="text" formControlName="telephone" />
+      </div>
+
+      <div class="champ-groupe">
+        <div class="champ">
+          <label for="horaireOuverture">Ouverture</label>
+          <input id="horaireOuverture" type="text" formControlName="horaireOuverture" />
+        </div>
+
+        <div class="champ">
+          <label for="horaireFermeture">Fermeture</label>
+          <input id="horaireFermeture" type="text" formControlName="horaireFermeture" />
+        </div>
+      </div>
+
+      <div class="champ">
+        <label for="numeroAgrementOrdre">Numéro d'agrément (Ordre National des Pharmaciens)</label>
+        <input id="numeroAgrementOrdre" type="text" formControlName="numeroAgrementOrdre" />
+        @if (formulaire.get('numeroAgrementOrdre')?.invalid && formulaire.get('numeroAgrementOrdre')?.touched) {
+          <p class="erreur-champ">Le numéro d'agrément est obligatoire.</p>
+        }
+      </div>
+
+      <button type="submit" class="submit-btn" [disabled]="envoiEnCours()">
+        {{ envoiEnCours() ? 'Enregistrement...' : 'Enregistrer' }}
+      </button>
+
+      @if (messageSucces()) {
+        <p class="succes">{{ messageSucces() }}</p>
+      }
+      @if (messageErreur()) {
+        <p class="erreur">{{ messageErreur() }}</p>
+      }
+
+    </form>
+  </div>
+</div>
