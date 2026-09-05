@@ -48,25 +48,27 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         String token = authHeader.substring(7);
 
         if (jwtTokenProvider.isValid(token)) {
-            String email = jwtTokenProvider.getEmailFromToken(token);
             String role = jwtTokenProvider.getRoleFromToken(token);
 
             // Spring Security attend les rôles préfixés par "ROLE_"
             var authorities = List.of(new SimpleGrantedAuthority("ROLE_" + role));
 
+            // JwtUserDetails porte toute l'identité utile (userId, email, role, tenantId, zoneId)
+            // et devient le principal lui-même : les controllers y accèdent directement
+            // via @AuthenticationPrincipal JwtUserDetails, sans redécoder le token.
+            var jwtUserDetails = new JwtUserDetails(
+                    jwtTokenProvider.getUserIdFromToken(token),
+                    jwtTokenProvider.getEmailFromToken(token),
+                    jwtTokenProvider.getTenantIdFromToken(token),
+                    jwtTokenProvider.getZoneIdFromToken(token),
+                    role
+            );
+
             var authentication = new UsernamePasswordAuthenticationToken(
-                    email,          // principal (identifiant de l'utilisateur)
+                    jwtUserDetails, // principal
                     null,           // credentials (pas nécessaire, déjà authentifié via le token)
                     authorities     // rôles/permissions
             );
-
-            // Attache manuellement les infos utiles (tenantId, zoneId, userId)
-            // pour que les controllers puissent les récupérer via la requête si besoin
-            authentication.setDetails(new JwtUserDetails(
-                    jwtTokenProvider.getUserIdFromToken(token),
-                    jwtTokenProvider.getTenantIdFromToken(token),
-                    jwtTokenProvider.getZoneIdFromToken(token)
-            ));
 
             // On enregistre l'authentification dans le contexte de sécurité de la requête
             SecurityContextHolder.getContext().setAuthentication(authentication);
