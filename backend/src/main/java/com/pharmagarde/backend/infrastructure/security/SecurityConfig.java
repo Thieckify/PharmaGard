@@ -55,9 +55,7 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 // CORS : autorise le frontend Angular (localhost:4200 en dev)
-                .cors(cors -> {}) 
-                .csrf(csrf -> csrf.disable())
-            
+                .cors(cors -> {})
 
                 // Désactivation CSRF : inutile en API stateless authentifiée par JWT
                 // (CSRF protège les sessions basées sur cookies, pas notre cas)
@@ -76,6 +74,10 @@ public class SecurityConfig {
 
                         // Documentation Swagger (si ajoutée plus tard)
                         .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
+
+                        // Gestion des fiches pharmacie : réservé aux pharmaciens (upsert de leur fiche)
+                        // et superviseurs (consultation), pas à un ADMIN qui n'a pas ce rôle métier
+                        .requestMatchers("/api/pharmacies/**").hasAnyRole("PHARMACIEN", "SUPERVISEUR")
 
                         // Tout le reste exige un token JWT valide
                         .anyRequest().authenticated()
