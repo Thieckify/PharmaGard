@@ -1,5 +1,11 @@
 package com.pharmagarde.backend.domain.model;
 
+import java.time.LocalDateTime;
+
+/**
+ * Modèle métier d'une pharmacie (tenant de la plateforme).
+ * POJO pur — aucune dépendance à Spring ou JPA, conformément à la Clean Architecture.
+ */
 public class Pharmacie {
 
     private Long id;
@@ -20,13 +26,21 @@ public class Pharmacie {
     // Tenant : le compte PHARMACIEN propriétaire de cette pharmacie
     private Long tenantUserId;
 
+    // Numéro d'agrément délivré par l'Ordre National des Pharmaciens (preuve d'exercice légal)
+    private String numeroAgrementOrdre;
+
+    // Traçabilité de la validation de la fiche par un superviseur
+    private Long valideParUserId;
+    private LocalDateTime valideLe;
+
     public Pharmacie() {
     }
 
     public Pharmacie(Long id, String nom, String adresse, Long quartierId, Long zoneId,
                       Double latitude, Double longitude, String telephone,
                       String horaireOuverture, String horaireFermeture,
-                      boolean active, Long tenantUserId) {
+                      boolean active, Long tenantUserId,
+                      String numeroAgrementOrdre, Long valideParUserId, LocalDateTime valideLe) {
         this.id = id;
         this.nom = nom;
         this.adresse = adresse;
@@ -39,6 +53,9 @@ public class Pharmacie {
         this.horaireFermeture = horaireFermeture;
         this.active = active;
         this.tenantUserId = tenantUserId;
+        this.numeroAgrementOrdre = numeroAgrementOrdre;
+        this.valideParUserId = valideParUserId;
+        this.valideLe = valideLe;
     }
 
     public Long getId() {
@@ -135,5 +152,29 @@ public class Pharmacie {
 
     public void setTenantUserId(Long tenantUserId) {
         this.tenantUserId = tenantUserId;
+    }
+
+    public String getNumeroAgrementOrdre() {
+        return numeroAgrementOrdre;
+    }
+
+    public void setNumeroAgrementOrdre(String numeroAgrementOrdre) {
+        this.numeroAgrementOrdre = numeroAgrementOrdre;
+    }
+
+    public Long getValideParUserId() {
+        return valideParUserId;
+    }
+
+    public void setValideParUserId(Long valideParUserId) {
+        this.valideParUserId = valideParUserId;
+    }
+
+    public LocalDateTime getValideLe() {
+        return valideLe;
+    }
+
+    public void setValideLe(LocalDateTime valideLe) {
+        this.valideLe = valideLe;
     }
 }

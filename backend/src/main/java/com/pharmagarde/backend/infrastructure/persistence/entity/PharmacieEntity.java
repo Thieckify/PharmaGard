@@ -2,6 +2,11 @@ package com.pharmagarde.backend.infrastructure.persistence.entity;
 
 import jakarta.persistence.*;
 
+import java.time.LocalDateTime;
+
+/**
+ * Entité JPA représentant une pharmacie (tenant) en base de données.
+ */
 @Entity
 @Table(name = "pharmacies")
 public class PharmacieEntity {
@@ -35,13 +40,26 @@ public class PharmacieEntity {
     @Column(name = "horaire_fermeture")
     private String horaireFermeture;
 
+    // Inactive par défaut : la fiche doit être validée par un superviseur avant publication
     @Column(nullable = false)
-    private boolean active = true;
+    private boolean active = false;
 
     // Tenant : le compte PHARMACIEN propriétaire
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "tenant_user_id", nullable = false)
     private UserEntity tenantUser;
+
+    // Numéro d'agrément délivré par l'Ordre National des Pharmaciens
+    @Column(name = "numero_agrement_ordre", nullable = false)
+    private String numeroAgrementOrdre;
+
+    // Traçabilité de la validation : quel superviseur a validé, et quand
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "valide_par_user_id")
+    private UserEntity valideParUser;
+
+    @Column(name = "valide_le")
+    private LocalDateTime valideLe;
 
     public PharmacieEntity() {
     }
@@ -140,5 +158,29 @@ public class PharmacieEntity {
 
     public void setTenantUser(UserEntity tenantUser) {
         this.tenantUser = tenantUser;
+    }
+
+    public String getNumeroAgrementOrdre() {
+        return numeroAgrementOrdre;
+    }
+
+    public void setNumeroAgrementOrdre(String numeroAgrementOrdre) {
+        this.numeroAgrementOrdre = numeroAgrementOrdre;
+    }
+
+    public UserEntity getValideParUser() {
+        return valideParUser;
+    }
+
+    public void setValideParUser(UserEntity valideParUser) {
+        this.valideParUser = valideParUser;
+    }
+
+    public LocalDateTime getValideLe() {
+        return valideLe;
+    }
+
+    public void setValideLe(LocalDateTime valideLe) {
+        this.valideLe = valideLe;
     }
 }

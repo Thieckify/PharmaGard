@@ -48,10 +48,9 @@ INSERT INTO users (id, email, password, role, tenant_id, zone_id, active) VALUES
 ON CONFLICT (id) DO NOTHING;
 
 -- ========== PHARMACIE TEST ==========
-INSERT INTO pharmacies (id, nom, adresse, quartier_id, zone_id, latitude, longitude, telephone, horaire_ouverture, horaire_fermeture, active, tenant_user_id) VALUES
-(1, 'Pharmacie du Plateau', 'Avenue Léopold Sédar Senghor, Plateau', 1, 1, 14.6708, -17.4313, '+221338210001', '08:00', '23:00', true, 4)
+INSERT INTO pharmacies (id, nom, adresse, quartier_id, zone_id, latitude, longitude, telephone, horaire_ouverture, horaire_fermeture, active, tenant_user_id, numero_agrement_ordre, valide_par_user_id, valide_le) VALUES
+(1, 'Pharmacie du Plateau', 'Avenue Léopold Sédar Senghor, Plateau', 1, 1, 14.6708, -17.4313, '+221338210001', '08:00', '23:00', true, 4, 'ONP-SN-2024-001', 3, '2026-08-01 09:00:00')
 ON CONFLICT (id) DO NOTHING;
-
 -- Remise à niveau des séquences
 SELECT setval('zones_id_seq', (SELECT MAX(id) FROM zones));
 SELECT setval('quartiers_id_seq', (SELECT MAX(id) FROM quartiers));
