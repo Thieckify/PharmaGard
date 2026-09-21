@@ -44,8 +44,9 @@ export class Login {
     this.authService.login({ email: this.email, password: this.password }).subscribe({
       next: () => {
         this.loading.set(false);
-        // Redirection après connexion réussie — on affinera par rôle avec les guards
-        this.router.navigate(['/']);
+        // Redirection après connexion réussie — vers le dashboard, pas l'espace public
+        // (qui vit maintenant sur '/'). Un vrai routage par rôle reste à faire plus tard.
+        this.router.navigate(['/dashboard']);
       },
       error: () => {
         this.loading.set(false);
