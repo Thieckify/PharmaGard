@@ -1,0 +1,163 @@
+<div class="accueil">
+
+  <nav class="nav">
+    <div class="nav__inner">
+      <a routerLink="/" class="nav__logo">
+        <span class="logo-mark">
+          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <path d="M9 3h6a1 1 0 0 1 1 1v4h4a1 1 0 0 1 1 1v6a1 1 0 0 1-1 1h-4v4a1 1 0 0 1-1 1H9a1 1 0 0 1-1-1v-4H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1h4V4a1 1 0 0 1 1-1z" fill="currentColor" />
+          </svg>
+        </span>
+        <span class="logo-text">PharmaGarde<span class="logo-dot">.</span></span>
+      </a>
+      <a routerLink="/auth/login" class="nav__lien">Espace pharmacien</a>
+    </div>
+  </nav>
+
+  <header class="hero">
+    <div class="hero__inner">
+      <div class="hero__eyebrow">
+        <span class="accent-dot">●</span>
+        Service public — Dakar
+      </div>
+      <h1>
+        Trouvez une pharmacie de garde<br />
+        <span class="accent">ouverte maintenant</span><span class="accent-dot">.</span>
+      </h1>
+      <p class="hero__subtitle">
+        Consultez les pharmacies assurant le service de garde à Dakar, nuit et jours fériés compris.
+        Aucune inscription nécessaire.
+      </p>
+
+      <div class="recherche">
+        <label for="date-garde">Date de recherche</label>
+        <p-datepicker
+          inputId="date-garde"
+          [ngModel]="dateSelectionnee()"
+          (ngModelChange)="onDateChange($event)"
+          dateFormat="dd/mm/yy"
+          [showIcon]="true"
+        />
+      </div>
+    </div>
+  </header>
+
+  <main class="resultats">
+    <div class="resultats__inner">
+
+      @if (chargement()) {
+        <p class="etat-info">Recherche en cours...</p>
+      } @else if (erreur()) {
+        <p class="etat-erreur">{{ erreur() }}</p>
+      } @else if (pharmacies().length === 0) {
+        <div class="etat-vide">
+          <h3>Aucune pharmacie de garde à cette date</h3>
+          <p>Essayez une autre date, ou contactez le SAMU au 1515 en cas d'urgence médicale.</p>
+        </div>
+      } @else {
+        <div class="resultats__entete">
+          <h2>{{ pharmacies().length }} pharmacie{{ pharmacies().length > 1 ? 's' : '' }} de garde</h2>
+          <span class="resultats__compteur">Mise à jour en direct</span>
+        </div>
+        <div class="liste-pharmacies">
+          @for (pharmacie of pharmacies(); track pharmacie.pharmacieId) {
+            <article class="carte-pharmacie">
+              <div class="carte-pharmacie__top">
+                <div>
+                  <h3>{{ pharmacie.nom }}</h3>
+                  <p class="carte-pharmacie__adresse">
+                    {{ pharmacie.adresse }}
+                  </p>
+                  <p class="carte-pharmacie__zone">
+                    {{ pharmacie.nomQuartier }} · {{ pharmacie.nomZone }}
+                  </p>
+                </div>
+                <span class="statut">
+                  <span class="statut__point"></span>
+                  {{ libelleType(pharmacie.typeGarde) }}
+                </span>
+              </div>
+
+              <div class="carte-pharmacie__bas">
+                <span class="carte-pharmacie__horaires">
+                  {{ pharmacie.horaireOuverture }} — {{ pharmacie.horaireFermeture }}
+                </span>
+                <div class="carte-pharmacie__actions">
+                  <a [href]="lienAppel(pharmacie.telephone)" class="btn btn--primaire">
+                    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                      <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.68 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.9.32 1.85.55 2.81.68A2 2 0 0 1 22 16.92z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    {{ pharmacie.telephone }}
+                  </a>
+                  <a [href]="lienItineraire(pharmacie)" target="_blank" rel="noopener" class="btn btn--secondaire">
+                    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                      <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                      <circle cx="12" cy="10" r="3" stroke="currentColor" stroke-width="2"/>
+                    </svg>
+                    Itinéraire
+                  </a>
+                </div>
+              </div>
+            </article>
+          }
+        </div>
+      }
+    </div>
+  </main>
+
+  <section class="explications">
+    <div class="explications__inner">
+      <h2>Comment ça marche<span class="accent-dot">.</span></h2>
+      <div class="etapes">
+        <div class="etape">
+          <span class="etape__numero">1</span>
+          <h3>Choisissez une date</h3>
+          <p>Aujourd'hui par défaut, ou n'importe quel jour à venir pour anticiper.</p>
+        </div>
+        <div class="etape">
+          <span class="etape__numero">2</span>
+          <h3>Consultez les pharmacies</h3>
+          <p>Adresse, quartier, horaires et type de garde assurée, mis à jour par les pharmaciens eux-mêmes.</p>
+        </div>
+        <div class="etape">
+          <span class="etape__numero">3</span>
+          <h3>Appelez ou déplacez-vous</h3>
+          <p>Un appel direct ou un itinéraire en un clic depuis votre téléphone.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="urgences">
+    <div class="urgences__inner">
+      <div class="urgences__entete">
+        <h2>En cas d'urgence</h2>
+        <p class="urgences__intro">
+          PharmaGarde ne remplace pas les services de secours. Ces numéros sont gratuits et joignables 24h/24.
+        </p>
+      </div>
+      <div class="urgences__liste">
+        <a href="tel:1515" class="urgence">
+          <span class="urgence__numero">1515</span>
+          <span class="urgence__label">SAMU — urgences médicales</span>
+        </a>
+        <a href="tel:18" class="urgence">
+          <span class="urgence__numero">18</span>
+          <span class="urgence__label">Sapeurs-pompiers</span>
+        </a>
+        <a href="tel:17" class="urgence">
+          <span class="urgence__numero">17</span>
+          <span class="urgence__label">Police secours</span>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <footer class="pied">
+    <div class="pied__inner">
+      <span>&copy; 2026 PharmaGarde — EPF Africa</span>
+      <a routerLink="/auth/login" class="pied__lien">Espace pharmacien</a>
+    </div>
+  </footer>
+
+</div>

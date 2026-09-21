@@ -1,0 +1,550 @@
+.accueil {
+  min-height: 100vh;
+  background: var(--pg-surface-0);
+}
+
+.nav {
+  background: var(--pg-primary-900);
+
+  &__inner {
+    max-width: 1040px;
+    margin: 0 auto;
+    padding: var(--pg-space-md) var(--pg-space-xl);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  &__logo {
+    display: flex;
+    align-items: center;
+    gap: var(--pg-space-xs);
+    text-decoration: none;
+    color: white;
+  }
+
+  &__lien {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.7);
+    text-decoration: none;
+    padding: 6px 14px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: var(--pg-radius-md);
+    transition: border-color 0.2s ease, color 0.2s ease;
+
+    &:hover {
+      color: white;
+      border-color: rgba(255, 255, 255, 0.5);
+    }
+  }
+}
+
+.logo-mark {
+  width: 32px;
+  height: 32px;
+  border-radius: var(--pg-radius-md);
+  background: white;
+  color: var(--pg-primary-700);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  svg {
+    width: 20px;
+    height: 20px;
+  }
+}
+
+.logo-text {
+  font-size: 1.0625rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.logo-dot,
+.accent-dot {
+  color: var(--pg-accent-gold);
+}
+
+.hero {
+  background: linear-gradient(135deg, var(--pg-primary-700) 0%, var(--pg-primary-900) 100%);
+  position: relative;
+
+  // Texture de points discrète — donne de la matière au bandeau
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: radial-gradient(rgba(255, 255, 255, 0.07) 1px, transparent 1px);
+    background-size: 22px 22px;
+    pointer-events: none;
+  }
+
+  // Halo lumineux, contenu dans les limites du bandeau (pas d'overflow: hidden ici,
+  // qui découperait le calendrier du datepicker quand il se déploie vers le bas)
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 620px;
+    height: 100%;
+    background: radial-gradient(circle at 70% 20%, rgba(255, 255, 255, 0.08) 0%, transparent 60%);
+    pointer-events: none;
+  }
+
+  &__inner {
+    max-width: 1040px;
+    margin: 0 auto;
+    padding: calc(var(--pg-space-2xl) * 1.4) var(--pg-space-xl) calc(var(--pg-space-2xl) * 2.2);
+    position: relative;
+    // Au-dessus de .resultats (z-index 2) : sinon le calendrier est masqué
+    z-index: 3;
+  }
+
+  &__eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.65);
+    padding: 6px 14px;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 999px;
+    margin-bottom: var(--pg-space-lg);
+
+    .accent-dot {
+      font-size: 0.5rem;
+    }
+  }
+
+  h1 {
+    color: white;
+    font-size: 3rem;
+    line-height: 1.1;
+    font-weight: 600;
+    letter-spacing: -0.03em;
+    margin-bottom: var(--pg-space-md);
+
+    .accent {
+      color: var(--pg-accent-gold);
+    }
+  }
+
+  &__subtitle {
+    font-size: 1.0625rem;
+    line-height: 1.6;
+    color: rgba(255, 255, 255, 0.7);
+    max-width: 520px;
+    margin: 0 0 calc(var(--pg-space-2xl) * 0.8);
+  }
+}
+
+.recherche {
+  display: inline-flex;
+  flex-direction: column;
+  gap: var(--pg-space-xs);
+  background: var(--pg-surface-0);
+  border-radius: var(--pg-radius-lg);
+  box-shadow: var(--pg-shadow-lg);
+  padding: var(--pg-space-lg);
+  min-width: 260px;
+
+  label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--pg-surface-500);
+  }
+}
+
+// Feuille pleine largeur qui remonte sur le bandeau : la transition se fait
+// par fondu plutôt que par une ligne horizontale nette.
+.resultats {
+  position: relative;
+  z-index: 2;
+  margin-top: calc(var(--pg-space-2xl) * -1);
+  background: linear-gradient(180deg, var(--pg-primary-50) 0%, var(--pg-surface-0) 320px);
+  border-radius: var(--pg-radius-lg) var(--pg-radius-lg) 0 0;
+
+  &__inner {
+    max-width: 1040px;
+    margin: 0 auto;
+    padding: calc(var(--pg-space-2xl) * 1.2) var(--pg-space-xl) var(--pg-space-2xl);
+  }
+
+  &__entete {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--pg-space-md);
+    margin-bottom: var(--pg-space-lg);
+
+    h2 {
+      font-size: 1.375rem;
+      letter-spacing: -0.02em;
+    }
+  }
+
+  &__compteur {
+    font-size: 0.75rem;
+    font-weight: 500;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--pg-surface-500);
+  }
+}
+
+.liste-pharmacies {
+  display: grid;
+  gap: var(--pg-space-md);
+}
+
+.carte-pharmacie {
+  background: var(--pg-surface-0);
+  border: 1px solid var(--pg-surface-200);
+  border-radius: var(--pg-radius-lg);
+  box-shadow: var(--pg-shadow-sm);
+  padding: var(--pg-space-xl);
+  position: relative;
+  overflow: hidden;
+  transition: box-shadow 0.25s ease, transform 0.25s ease, border-color 0.25s ease;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--pg-primary-500), var(--pg-accent-gold));
+  }
+
+  &:hover {
+    box-shadow: var(--pg-shadow-lg);
+    transform: translateY(-2px);
+    border-color: var(--pg-surface-300);
+  }
+
+  &__top {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--pg-space-lg);
+
+    h3 {
+      font-size: 1.25rem;
+      letter-spacing: -0.02em;
+      margin-bottom: 6px;
+    }
+  }
+
+  &__adresse {
+    color: var(--pg-surface-700);
+    font-size: 0.9375rem;
+    margin: 0 0 2px;
+  }
+
+  &__zone {
+    color: var(--pg-surface-500);
+    font-size: 0.8125rem;
+    margin: 0;
+  }
+
+  &__bas {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--pg-space-md);
+    flex-wrap: wrap;
+    margin-top: var(--pg-space-lg);
+    padding-top: var(--pg-space-md);
+    border-top: 1px solid var(--pg-surface-100);
+  }
+
+  &__horaires {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--pg-surface-700);
+    font-variant-numeric: tabular-nums;
+  }
+
+  &__actions {
+    display: flex;
+    gap: var(--pg-space-sm);
+    flex-wrap: wrap;
+  }
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 16px;
+  border-radius: var(--pg-radius-md);
+  font-size: 0.875rem;
+  font-weight: 500;
+  text-decoration: none;
+  transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+
+  svg {
+    width: 15px;
+    height: 15px;
+    flex-shrink: 0;
+  }
+
+  &--primaire {
+    background: var(--pg-primary-600);
+    color: white;
+
+    &:hover {
+      background: var(--pg-primary-700);
+    }
+  }
+
+  &--secondaire {
+    background: var(--pg-surface-0);
+    color: var(--pg-surface-700);
+    border: 1px solid var(--pg-surface-300);
+
+    &:hover {
+      border-color: var(--pg-primary-600);
+      color: var(--pg-primary-600);
+    }
+  }
+}
+
+.statut {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  white-space: nowrap;
+  background: rgba(16, 185, 129, 0.1);
+  color: var(--pg-success);
+  flex-shrink: 0;
+
+  &__point {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--pg-success);
+    position: relative;
+
+    // Halo qui pulse : signale visuellement une garde en cours
+    &::after {
+      content: '';
+      position: absolute;
+      inset: -4px;
+      border-radius: 50%;
+      background: var(--pg-success);
+      opacity: 0.35;
+      animation: pulse-garde 2s ease-out infinite;
+    }
+  }
+}
+
+@keyframes pulse-garde {
+  0%   { transform: scale(0.6); opacity: 0.4; }
+  70%  { transform: scale(1.4); opacity: 0; }
+  100% { transform: scale(1.4); opacity: 0; }
+}
+
+.etat-info,
+.etat-erreur {
+  color: var(--pg-surface-500);
+}
+
+.etat-erreur {
+  color: var(--pg-error);
+}
+
+.etat-vide {
+  text-align: center;
+  padding: calc(var(--pg-space-2xl) * 1.2) var(--pg-space-xl);
+  border: 1px dashed var(--pg-surface-300);
+  border-radius: var(--pg-radius-lg);
+  background: var(--pg-surface-50);
+
+  h3 {
+    font-size: 1.125rem;
+    margin-bottom: var(--pg-space-xs);
+  }
+
+  p {
+    color: var(--pg-surface-500);
+    margin: 0;
+  }
+}
+
+.explications {
+  background: var(--pg-surface-50);
+  border-top: 1px solid var(--pg-surface-200);
+
+  &__inner {
+    max-width: 1040px;
+    margin: 0 auto;
+    padding: calc(var(--pg-space-2xl) * 1.2) var(--pg-space-xl);
+  }
+
+  h2 {
+    font-size: 1.5rem;
+    letter-spacing: -0.02em;
+    margin-bottom: var(--pg-space-xl);
+  }
+}
+
+.etapes {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--pg-space-xl);
+}
+
+.etape {
+  &__numero {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    height: 34px;
+    border-radius: var(--pg-radius-md);
+    background: var(--pg-surface-0);
+    border: 1px solid var(--pg-surface-200);
+    color: var(--pg-primary-700);
+    font-weight: 600;
+    font-size: 0.9375rem;
+    margin-bottom: var(--pg-space-md);
+  }
+
+  h3 {
+    font-size: 1rem;
+    margin-bottom: var(--pg-space-xs);
+  }
+
+  p {
+    color: var(--pg-surface-500);
+    font-size: 0.9375rem;
+    line-height: 1.6;
+    margin: 0;
+  }
+}
+
+.urgences {
+  background: var(--pg-primary-900);
+
+  &__inner {
+    max-width: 1040px;
+    margin: 0 auto;
+    padding: calc(var(--pg-space-2xl) * 1.2) var(--pg-space-xl);
+  }
+
+  &__entete {
+    margin-bottom: var(--pg-space-xl);
+    max-width: 560px;
+  }
+
+  h2 {
+    color: white;
+    font-size: 1.5rem;
+    letter-spacing: -0.02em;
+    margin-bottom: var(--pg-space-xs);
+  }
+
+  &__intro {
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 0.9375rem;
+    line-height: 1.6;
+    margin: 0;
+  }
+
+  &__liste {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--pg-space-md);
+  }
+}
+
+.urgence {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: var(--pg-space-lg);
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: var(--pg-radius-lg);
+  text-decoration: none;
+  transition: background 0.2s ease, border-color 0.2s ease;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.09);
+    border-color: rgba(255, 255, 255, 0.3);
+  }
+
+  &__numero {
+    font-size: 1.75rem;
+    font-weight: 600;
+    color: var(--pg-accent-gold);
+    letter-spacing: -0.03em;
+    font-variant-numeric: tabular-nums;
+  }
+
+  &__label {
+    font-size: 0.875rem;
+    color: rgba(255, 255, 255, 0.7);
+  }
+}
+
+.pied {
+  background: var(--pg-primary-900);
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+
+  &__inner {
+    max-width: 1040px;
+    margin: 0 auto;
+    padding: var(--pg-space-lg) var(--pg-space-xl);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 0.875rem;
+    color: rgba(255, 255, 255, 0.5);
+  }
+
+  &__lien {
+    color: rgba(255, 255, 255, 0.7);
+    text-decoration: none;
+    font-weight: 500;
+
+    &:hover {
+      color: white;
+    }
+  }
+}
+
+@media (max-width: 760px) {
+  .hero h1 {
+    font-size: 2rem;
+  }
+
+  .etapes,
+  .urgences__liste {
+    grid-template-columns: 1fr;
+  }
+
+  .recherche {
+    display: flex;
+    width: 100%;
+  }
+
+  .carte-pharmacie__top {
+    flex-direction: column;
+    gap: var(--pg-space-sm);
+  }
+}
