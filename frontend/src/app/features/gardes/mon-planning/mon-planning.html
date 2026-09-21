@@ -1,0 +1,75 @@
+<div class="page-wrapper">
+  <div class="page">
+    <header class="page-header">
+      <div class="page-header__eyebrow">
+        <span class="accent-dot">●</span> Planning
+      </div>
+      <h1>Mon planning de garde<span class="accent-dot">.</span></h1>
+      <p class="page-header__subtitle">Déclarez, modifiez ou supprimez vos périodes de garde.</p>
+    </header>
+
+    <form (ngSubmit)="onSubmit()" class="formulaire-garde">
+      <h2>{{ gardeEnEdition() ? 'Modifier la période' : 'Déclarer une nouvelle période' }}</h2>
+
+      <div class="formulaire-garde__champs">
+        <div class="champ">
+          <label for="date-debut">Date de début</label>
+          <p-datepicker inputId="date-debut" [(ngModel)]="dateDebut" name="dateDebut"
+                         dateFormat="dd/mm/yy" [showIcon]="true" />
+        </div>
+        <div class="champ">
+          <label for="date-fin">Date de fin</label>
+          <p-datepicker inputId="date-fin" [(ngModel)]="dateFin" name="dateFin"
+                         dateFormat="dd/mm/yy" [showIcon]="true" />
+        </div>
+        <div class="champ">
+          <label for="type-garde">Type</label>
+          <p-select inputId="type-garde" [(ngModel)]="type" name="type"
+                     [options]="typesGarde" optionLabel="label" optionValue="value" />
+        </div>
+      </div>
+
+      @if (erreurFormulaire()) {
+        <p class="etat-erreur">{{ erreurFormulaire() }}</p>
+      }
+
+      <div class="formulaire-garde__actions">
+        <button type="submit" class="btn btn--primaire" [disabled]="enregistrement()">
+          {{ gardeEnEdition() ? 'Enregistrer les modifications' : 'Déclarer' }}
+        </button>
+        @if (gardeEnEdition()) {
+          <button type="button" class="btn btn--secondaire" (click)="annulerEdition()">Annuler</button>
+        }
+      </div>
+    </form>
+
+    @if (chargement()) {
+      <p class="etat-info">Chargement de votre planning...</p>
+    } @else if (erreur()) {
+      <p class="etat-erreur">{{ erreur() }}</p>
+    } @else if (gardes().length === 0) {
+      <div class="etat-vide">
+        <p>Aucune période de garde déclarée pour l'instant.</p>
+      </div>
+    } @else {
+      <div class="liste-pharmacies">
+        @for (garde of gardes(); track garde.id) {
+          <article class="carte-pharmacie">
+            <div class="carte-pharmacie__top">
+              <h3>{{ garde.dateDebut }} → {{ garde.dateFin }}</h3>
+              <span class="statut statut--active">
+                <span class="statut__point"></span>
+                {{ libelleType(garde.type) }}
+              </span>
+            </div>
+            <p class="carte-pharmacie__adresse">{{ garde.nomPharmacie }}</p>
+            <div class="carte-pharmacie__actions">
+              <button type="button" class="btn btn--secondaire" (click)="modifier(garde)">Modifier</button>
+              <button type="button" class="btn btn--danger" (click)="supprimer(garde)">Supprimer</button>
+            </div>
+          </article>
+        }
+      </div>
+    }
+  </div>
+</div>
