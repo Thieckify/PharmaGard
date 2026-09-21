@@ -2,6 +2,7 @@ package com.pharmagarde.backend.adapter.web.controller;
 
 import com.pharmagarde.backend.application.dto.PharmacieRequest;
 import com.pharmagarde.backend.application.dto.PharmacieResponse;
+import com.pharmagarde.backend.application.dto.ValidationRequest;
 import com.pharmagarde.backend.application.service.PharmacieService;
 import com.pharmagarde.backend.infrastructure.security.JwtUserDetails;
 import jakarta.validation.Valid;
@@ -12,7 +13,7 @@ import java.util.List;
 
 /**
  * Endpoints REST pour la gestion des fiches pharmacie.
- * Toute la logique (résolution du quartier, upsert, filtrage par rôle) vit dans PharmacieService.
+ * Toute la logique (résolution du quartier, upsert, filtrage par rôle, validation) vit dans PharmacieService.
  */
 @RestController
 @RequestMapping("/api/pharmacies")
@@ -35,5 +36,13 @@ public class PharmacieController {
     @GetMapping
     public List<PharmacieResponse> listPharmacies(@AuthenticationPrincipal JwtUserDetails principal) {
         return pharmacieService.listPharmacies(principal);
+    }
+
+    // PATCH /api/pharmacies/{id}/validation : un superviseur valide ou refuse une pharmacie
+    @PatchMapping("/{id}/validation")
+    public PharmacieResponse validerPharmacie(@PathVariable Long id,
+                                               @Valid @RequestBody ValidationRequest request,
+                                               @AuthenticationPrincipal JwtUserDetails principal) {
+        return pharmacieService.validerPharmacie(id, request, principal);
     }
 }

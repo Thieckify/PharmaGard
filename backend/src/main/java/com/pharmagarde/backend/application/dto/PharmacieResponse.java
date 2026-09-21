@@ -1,5 +1,7 @@
 package com.pharmagarde.backend.application.dto;
 
+import java.time.LocalDateTime;
+
 // Représentation d'une pharmacie renvoyée au frontend
 public record PharmacieResponse(
         Long id,
@@ -15,5 +17,7 @@ public record PharmacieResponse(
         String horaireOuverture,
         String horaireFermeture,
         boolean active,
-        Long tenantUserId) {
+        Long tenantUserId,
+        Long valideParUserId,
+        LocalDateTime valideLe) {
 }
