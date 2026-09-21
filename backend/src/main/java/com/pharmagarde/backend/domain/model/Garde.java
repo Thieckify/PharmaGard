@@ -3,13 +3,17 @@ package com.pharmagarde.backend.domain.model;
 import com.pharmagarde.backend.domain.enums.TypeGarde;
 import java.time.LocalDate;
 
+/**
+ * Représente une période de garde déclarée par une pharmacie : une plage de dates
+ * pendant laquelle elle assure le service de garde (nuit, dimanche/férié, ou les deux).
+ */
 public class Garde {
 
     private Long id;
     private Long pharmacieId;
-    private LocalDate dateDebut; // typiquement un lundi
-    private LocalDate dateFin;   // typiquement le dimanche suivant
-    private TypeGarde type;      // JOUR, NUIT, COMPLETE
+    private LocalDate dateDebut;
+    private LocalDate dateFin;
+    private TypeGarde type;
 
     public Garde() {
     }

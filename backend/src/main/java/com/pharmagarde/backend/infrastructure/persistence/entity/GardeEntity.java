@@ -2,8 +2,14 @@ package com.pharmagarde.backend.infrastructure.persistence.entity;
 
 import com.pharmagarde.backend.domain.enums.TypeGarde;
 import jakarta.persistence.*;
+
 import java.time.LocalDate;
 
+/**
+ * Entité JPA représentant une période de garde en base de données.
+ * Liée à une pharmacie ; le mapping vers/depuis le modèle domaine Garde
+ * se fait via GardeMapper.
+ */
 @Entity
 @Table(name = "gardes")
 public class GardeEntity {
