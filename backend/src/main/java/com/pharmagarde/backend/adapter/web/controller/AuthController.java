@@ -2,8 +2,10 @@ package com.pharmagarde.backend.adapter.web.controller;
 
 import com.pharmagarde.backend.application.dto.LoginRequest;
 import com.pharmagarde.backend.application.dto.LoginResponse;
+import com.pharmagarde.backend.application.dto.RegisterRequest;
 import com.pharmagarde.backend.application.service.AuthService;
 import jakarta.validation.Valid;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -28,5 +30,11 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<LoginResponse> login(@Valid @RequestBody LoginRequest request) {
         return ResponseEntity.ok(authService.login(request));
+    }
+
+    @PostMapping("/register")
+    public ResponseEntity<LoginResponse> register(@Valid @RequestBody RegisterRequest request) {
+        // 201 Created plutôt que 200 : convention REST pour "une ressource a été créée"
+        return ResponseEntity.status(HttpStatus.CREATED).body(authService.register(request));
     }
 }

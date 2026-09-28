@@ -42,8 +42,15 @@ public class PharmacieService {
         this.userRepository = userRepository;
     }
 
-    // Crée la fiche pharmacie du user connecté si elle n'existe pas, sinon la met à jour.
+    // Point d'entrée utilisé par le controller : l'identité du pharmacien vient de son JWT.
     public PharmacieResponse upsertPharmacie(PharmacieRequest request, JwtUserDetails principal) {
+        return upsertPharmacieDeUtilisateur(request, principal.userId());
+    }
+
+    // Crée la fiche pharmacie de l'utilisateur donné si elle n'existe pas, sinon la met à jour.
+    // Prend un simple userId (et non le JWT) pour être aussi réutilisable à l'inscription,
+    // moment où le JWT n'existe pas encore.
+    public PharmacieResponse upsertPharmacieDeUtilisateur(PharmacieRequest request, Long userId) {
 
         // 1. On va chercher le quartier choisi par le pharmacien.
         // orElseThrow(...) : si aucun quartier ne correspond à cet id, on arrête tout de suite
@@ -56,10 +63,10 @@ public class PharmacieService {
 
         // 3. On vérifie si ce pharmacien a déjà une fiche.
         // findByTenantUserId renvoie une List (potentiellement vide) : on prend le 1er élément s'il existe.
-        List<PharmacieEntity> pharmaciesExistantes = pharmacieRepository.findByTenantUserId(principal.userId());
+        List<PharmacieEntity> pharmaciesExistantes = pharmacieRepository.findByTenantUserId(userId);
 
         PharmacieEntity entity;
-                if (!pharmaciesExistantes.isEmpty()) {
+        if (!pharmaciesExistantes.isEmpty()) {
             entity = pharmaciesExistantes.get(0);
 
             // Si la zone change, la validation précédente (donnée par le superviseur de l'ancienne
@@ -83,8 +90,8 @@ public class PharmacieService {
             entity.setHoraireFermeture(request.horaireFermeture());
         } else {
             // Création : nouvelle fiche, inactive par défaut (en attente de validation)
-            UserEntity tenantUser = userRepository.findById(principal.userId())
-                    .orElseThrow(() -> new IllegalArgumentException("Utilisateur introuvable : " + principal.userId()));
+            UserEntity tenantUser = userRepository.findById(userId)
+                    .orElseThrow(() -> new IllegalArgumentException("Utilisateur introuvable : " + userId));
 
             entity = new PharmacieEntity();
             entity.setNom(request.nom());
