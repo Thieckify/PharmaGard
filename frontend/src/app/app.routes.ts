@@ -20,6 +20,11 @@ export const routes: Routes = [
     path: 'auth/login',
     loadComponent: () => import('./features/auth/login/login').then(m => m.Login)
   },
+  // Inscription self-service d'un pharmacien (compte + fiche pharmacie) : accessible sans être authentifié
+  {
+    path: 'auth/register',
+    loadComponent: () => import('./features/auth/register/register').then(m => m.Register)
+  },
   // Tableau de bord temporaire de test (S2), accessible à tout utilisateur connecté
   {
     path: 'dashboard',
