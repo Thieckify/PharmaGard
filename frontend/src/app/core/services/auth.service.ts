@@ -2,15 +2,15 @@ import { Injectable, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { Observable, tap } from 'rxjs';
-import { LoginRequest, LoginResponse } from '../models/auth.model';
+import { LoginRequest, LoginResponse, RegisterRequest } from '../models/auth.model';
 import { environment } from '../../../environments/environment';
 
 const TOKEN_KEY = 'pharmagarde_token';
 
 /**
  * Service central d'authentification.
- * Gère le login, la déconnexion, et expose l'état de session
- * (utilisateur connecté ou non) au reste de l'application via un signal.
+ * Gère le login, l'inscription self-service, la déconnexion, et expose l'état
+ * de session (utilisateur connecté ou non) au reste de l'application via un signal.
  */
 @Injectable({ providedIn: 'root' })
 export class AuthService {
@@ -28,10 +28,18 @@ export class AuthService {
    */
   login(request: LoginRequest): Observable<LoginResponse> {
     return this.http.post<LoginResponse>(`${this.apiUrl}/login`, request).pipe(
-      tap(response => {
-        localStorage.setItem(TOKEN_KEY, JSON.stringify(response));
-        this.currentUser.set(response);
-      })
+      tap(response => this.stockerSession(response))
+    );
+  }
+
+  /**
+   * Appelle POST /api/auth/register (inscription self-service pharmacien : compte
+   * ET fiche pharmacie créés ensemble). Connecte directement l'utilisateur, comme
+   * login() : même forme de réponse, même stockage de session (décision S5).
+   */
+  register(request: RegisterRequest): Observable<LoginResponse> {
+    return this.http.post<LoginResponse>(`${this.apiUrl}/register`, request).pipe(
+      tap(response => this.stockerSession(response))
     );
   }
 
@@ -65,5 +73,12 @@ export class AuthService {
   private loadFromStorage(): LoginResponse | null {
     const raw = localStorage.getItem(TOKEN_KEY);
     return raw ? JSON.parse(raw) : null;
+  }
+
+  // Enregistre la session (token + infos user) en localStorage et met à jour le
+  // signal currentUser. Commun à login() et register(), qui renvoient la même forme.
+  private stockerSession(response: LoginResponse): void {
+    localStorage.setItem(TOKEN_KEY, JSON.stringify(response));
+    this.currentUser.set(response);
   }
 }
