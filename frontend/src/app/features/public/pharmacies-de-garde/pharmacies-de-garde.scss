@@ -31,7 +31,9 @@
     padding: 6px 14px;
     border: 1px solid rgba(255, 255, 255, 0.2);
     border-radius: var(--pg-radius-md);
-    transition: border-color 0.2s ease, color 0.2s ease;
+    transition:
+      border-color 0.2s ease,
+      color 0.2s ease;
 
     &:hover {
       color: white;
@@ -71,7 +73,6 @@
   background: linear-gradient(135deg, var(--pg-primary-700) 0%, var(--pg-primary-900) 100%);
   position: relative;
 
-  // Texture de points discrète — donne de la matière au bandeau
   &::after {
     content: '';
     position: absolute;
@@ -81,8 +82,6 @@
     pointer-events: none;
   }
 
-  // Halo lumineux, contenu dans les limites du bandeau (pas d'overflow: hidden ici,
-  // qui découperait le calendrier du datepicker quand il se déploie vers le bas)
   &::before {
     content: '';
     position: absolute;
@@ -99,7 +98,6 @@
     margin: 0 auto;
     padding: calc(var(--pg-space-2xl) * 1.4) var(--pg-space-xl) calc(var(--pg-space-2xl) * 2.2);
     position: relative;
-    // Au-dessus de .resultats (z-index 2) : sinon le calendrier est masqué
     z-index: 3;
   }
 
@@ -145,14 +143,14 @@
 }
 
 .recherche {
-  display: inline-flex;
+  display: flex;
   flex-direction: column;
-  gap: var(--pg-space-xs);
+  gap: var(--pg-space-sm);
   background: var(--pg-surface-0);
   border-radius: var(--pg-radius-lg);
   box-shadow: var(--pg-shadow-lg);
   padding: var(--pg-space-lg);
-  min-width: 260px;
+  width: 300px;
 
   label {
     font-size: 0.75rem;
@@ -161,6 +159,85 @@
     text-transform: uppercase;
     color: var(--pg-surface-500);
   }
+}
+
+.recherche__onglets {
+  display: flex;
+  gap: 2px;
+  padding: 3px;
+  background: var(--pg-surface-100);
+  border-radius: var(--pg-radius-md);
+  margin-bottom: var(--pg-space-sm);
+}
+
+.onglet {
+  flex: 1;
+  appearance: none;
+  -webkit-appearance: none;
+  border: none;
+  font: inherit;
+  padding: 8px 16px;
+  background: transparent;
+  border-radius: calc(var(--pg-radius-md) - 3px);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--pg-surface-500);
+  cursor: pointer;
+  line-height: 1.2;
+  white-space: nowrap;
+  transition: background 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
+
+  &:hover:not(&--actif) {
+    color: var(--pg-surface-700);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--pg-primary-500);
+    outline-offset: 2px;
+  }
+
+  &--actif {
+    background: var(--pg-primary-600);
+    color: white;
+    box-shadow: var(--pg-shadow-sm);
+  }
+}
+
+.btn-position {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  align-self: flex-start;
+  padding: 7px 12px;
+  border: 1px solid var(--pg-surface-200);
+  background: var(--pg-surface-0);
+  border-radius: var(--pg-radius-md);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--pg-primary-700);
+  cursor: pointer;
+  transition: border-color 0.2s ease, background 0.2s ease;
+
+  svg {
+    width: 14px;
+    height: 14px;
+  }
+
+  &:hover:not(:disabled) {
+    border-color: var(--pg-primary-500);
+    background: var(--pg-primary-50);
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: default;
+  }
+}
+
+.erreur-position {
+  font-size: 0.75rem;
+  color: var(--pg-surface-500);
+  margin: 0;
 }
 
 // Feuille pleine largeur qui remonte sur le bandeau : la transition se fait
@@ -213,7 +290,10 @@
   padding: var(--pg-space-xl);
   position: relative;
   overflow: hidden;
-  transition: box-shadow 0.25s ease, transform 0.25s ease, border-color 0.25s ease;
+  transition:
+    box-shadow 0.25s ease,
+    transform 0.25s ease,
+    border-color 0.25s ease;
 
   &::before {
     content: '';
@@ -254,6 +334,11 @@
     color: var(--pg-surface-500);
     font-size: 0.8125rem;
     margin: 0;
+
+    strong {
+      color: var(--pg-surface-700);
+      font-weight: 600;
+    }
   }
 
   &__bas {
@@ -281,6 +366,12 @@
   }
 }
 
+.carte-pharmacie__sans-position {
+  font-size: 0.8125rem;
+  color: var(--pg-surface-500);
+  font-style: italic;
+}
+
 .btn {
   display: inline-flex;
   align-items: center;
@@ -290,7 +381,10 @@
   font-size: 0.875rem;
   font-weight: 500;
   text-decoration: none;
-  transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+  transition:
+    background 0.2s ease,
+    border-color 0.2s ease,
+    color 0.2s ease;
 
   svg {
     width: 15px;
@@ -339,7 +433,6 @@
     background: var(--pg-success);
     position: relative;
 
-    // Halo qui pulse : signale visuellement une garde en cours
     &::after {
       content: '';
       position: absolute;
@@ -353,9 +446,18 @@
 }
 
 @keyframes pulse-garde {
-  0%   { transform: scale(0.6); opacity: 0.4; }
-  70%  { transform: scale(1.4); opacity: 0; }
-  100% { transform: scale(1.4); opacity: 0; }
+  0% {
+    transform: scale(0.6);
+    opacity: 0.4;
+  }
+  70% {
+    transform: scale(1.4);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1.4);
+    opacity: 0;
+  }
 }
 
 .etat-info,
@@ -481,7 +583,9 @@
   border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: var(--pg-radius-lg);
   text-decoration: none;
-  transition: background 0.2s ease, border-color 0.2s ease;
+  transition:
+    background 0.2s ease,
+    border-color 0.2s ease;
 
   &:hover {
     background: rgba(255, 255, 255, 0.09);
@@ -539,7 +643,6 @@
   }
 
   .recherche {
-    display: flex;
     width: 100%;
   }
 

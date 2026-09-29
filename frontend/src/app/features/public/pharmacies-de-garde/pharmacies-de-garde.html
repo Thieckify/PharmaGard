@@ -30,14 +30,49 @@
       </p>
 
       <div class="recherche">
-        <label for="date-garde">Date de recherche</label>
-        <p-datepicker
-          inputId="date-garde"
-          [ngModel]="dateSelectionnee()"
-          (ngModelChange)="onDateChange($event)"
-          dateFormat="dd/mm/yy"
-          [showIcon]="true"
-        />
+        <div class="recherche__onglets">
+          <button type="button" class="onglet" [class.onglet--actif]="modeRecherche() === 'date'" (click)="onModeChange('date')">
+            Par date
+          </button>
+          <button type="button" class="onglet" [class.onglet--actif]="modeRecherche() === 'quartier'" (click)="onModeChange('quartier')">
+            Par quartier
+          </button>
+        </div>
+
+        @if (modeRecherche() === 'date') {
+          <label for="date-garde">Date de recherche</label>
+          <p-datepicker
+            inputId="date-garde"
+            [ngModel]="dateSelectionnee()"
+            (ngModelChange)="onDateChange($event)"
+            dateFormat="dd/mm/yy"
+            [showIcon]="true"
+          />
+        } @else {
+          <label for="quartier-recherche">Quartier</label>
+          <p-select
+            inputId="quartier-recherche"
+            [options]="quartiers()"
+            optionLabel="nom"
+            optionValue="id"
+            placeholder="Tous les quartiers"
+            [showClear]="true"
+            [ngModel]="quartierSelectionne()"
+            (ngModelChange)="onQuartierChange($event)"
+          />
+
+          <button type="button" class="btn-position" (click)="utiliserMaPosition()" [disabled]="chargementPosition()">
+            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <circle cx="12" cy="10" r="3" stroke="currentColor" stroke-width="2"/>
+            </svg>
+            {{ chargementPosition() ? 'Localisation...' : 'Utiliser ma position' }}
+          </button>
+
+          @if (erreurPosition()) {
+            <p class="erreur-position">{{ erreurPosition() }}</p>
+          }
+        }
       </div>
     </div>
   </header>
@@ -45,62 +80,127 @@
   <main class="resultats">
     <div class="resultats__inner">
 
-      @if (chargement()) {
-        <p class="etat-info">Recherche en cours...</p>
-      } @else if (erreur()) {
-        <p class="etat-erreur">{{ erreur() }}</p>
-      } @else if (pharmacies().length === 0) {
-        <div class="etat-vide">
-          <h3>Aucune pharmacie de garde à cette date</h3>
-          <p>Essayez une autre date, ou contactez le SAMU au 1515 en cas d'urgence médicale.</p>
-        </div>
-      } @else {
-        <div class="resultats__entete">
-          <h2>{{ pharmacies().length }} pharmacie{{ pharmacies().length > 1 ? 's' : '' }} de garde</h2>
-          <span class="resultats__compteur">Mise à jour en direct</span>
-        </div>
-        <div class="liste-pharmacies">
-          @for (pharmacie of pharmacies(); track pharmacie.pharmacieId) {
-            <article class="carte-pharmacie">
-              <div class="carte-pharmacie__top">
-                <div>
-                  <h3>{{ pharmacie.nom }}</h3>
-                  <p class="carte-pharmacie__adresse">
-                    {{ pharmacie.adresse }}
-                  </p>
-                  <p class="carte-pharmacie__zone">
-                    {{ pharmacie.nomQuartier }} · {{ pharmacie.nomZone }}
-                  </p>
+      @if (modeRecherche() === 'date') {
+        @if (chargement()) {
+          <p class="etat-info">Recherche en cours...</p>
+        } @else if (erreur()) {
+          <p class="etat-erreur">{{ erreur() }}</p>
+        } @else if (pharmacies().length === 0) {
+          <div class="etat-vide">
+            <h3>Aucune pharmacie de garde à cette date</h3>
+            <p>Essayez une autre date, ou contactez le SAMU au 1515 en cas d'urgence médicale.</p>
+          </div>
+        } @else {
+          <div class="resultats__entete">
+            <h2>{{ pharmacies().length }} pharmacie{{ pharmacies().length > 1 ? 's' : '' }} de garde</h2>
+            <span class="resultats__compteur">Mise à jour en direct</span>
+          </div>
+          <div class="liste-pharmacies">
+            @for (pharmacie of pharmacies(); track pharmacie.pharmacieId) {
+              <article class="carte-pharmacie">
+                <div class="carte-pharmacie__top">
+                  <div>
+                    <h3>{{ pharmacie.nom }}</h3>
+                    <p class="carte-pharmacie__adresse">
+                      {{ pharmacie.adresse }}
+                    </p>
+                    <p class="carte-pharmacie__zone">
+                      {{ pharmacie.nomQuartier }} · {{ pharmacie.nomZone }}
+                    </p>
+                  </div>
+                  <span class="statut">
+                    <span class="statut__point"></span>
+                    {{ libelleType(pharmacie.typeGarde) }}
+                  </span>
                 </div>
-                <span class="statut">
-                  <span class="statut__point"></span>
-                  {{ libelleType(pharmacie.typeGarde) }}
-                </span>
-              </div>
 
-              <div class="carte-pharmacie__bas">
-                <span class="carte-pharmacie__horaires">
-                  {{ pharmacie.horaireOuverture }} — {{ pharmacie.horaireFermeture }}
-                </span>
-                <div class="carte-pharmacie__actions">
-                  <a [href]="lienAppel(pharmacie.telephone)" class="btn btn--primaire">
-                    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                      <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.68 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.9.32 1.85.55 2.81.68A2 2 0 0 1 22 16.92z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                    </svg>
-                    {{ pharmacie.telephone }}
-                  </a>
-                  <a [href]="lienItineraire(pharmacie)" target="_blank" rel="noopener" class="btn btn--secondaire">
-                    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                      <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                      <circle cx="12" cy="10" r="3" stroke="currentColor" stroke-width="2"/>
-                    </svg>
-                    Itinéraire
-                  </a>
+                <div class="carte-pharmacie__bas">
+                  <span class="carte-pharmacie__horaires">
+                    {{ pharmacie.horaireOuverture }} — {{ pharmacie.horaireFermeture }}
+                  </span>
+                  <div class="carte-pharmacie__actions">
+                    <a [href]="lienAppel(pharmacie.telephone)" class="btn btn--primaire">
+                      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                        <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.68 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.9.32 1.85.55 2.81.68A2 2 0 0 1 22 16.92z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                      </svg>
+                      {{ pharmacie.telephone }}
+                    </a>
+                    <a [href]="lienItineraire(pharmacie)" target="_blank" rel="noopener" class="btn btn--secondaire">
+                      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                        <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <circle cx="12" cy="10" r="3" stroke="currentColor" stroke-width="2"/>
+                      </svg>
+                      Itinéraire
+                    </a>
+                  </div>
                 </div>
-              </div>
-            </article>
-          }
-        </div>
+              </article>
+            }
+          </div>
+        }
+      } @else {
+        @if (chargementPharmacies()) {
+          <p class="etat-info">Recherche en cours...</p>
+        } @else if (erreurPharmacies()) {
+          <p class="etat-erreur">{{ erreurPharmacies() }}</p>
+        } @else if (pharmaciesPubliques().length === 0) {
+          <div class="etat-vide">
+            <h3>Aucune pharmacie trouvée</h3>
+            <p>Essayez un autre quartier, ou réinitialisez le filtre pour voir toutes les pharmacies actives.</p>
+          </div>
+        } @else {
+          <div class="resultats__entete">
+            <h2>{{ pharmaciesPubliques().length }} pharmacie{{ pharmaciesPubliques().length > 1 ? 's' : '' }}</h2>
+            <span class="resultats__compteur">
+              {{ positionActivee() ? 'Triées par proximité' : (quartierSelectionne() ? 'Filtré par quartier' : 'Toutes les pharmacies actives') }}
+            </span>
+          </div>
+          <div class="liste-pharmacies">
+            @for (pharmacie of pharmaciesPubliques(); track pharmacie.pharmacieId) {
+              <article class="carte-pharmacie">
+                <div class="carte-pharmacie__top">
+                  <div>
+                    <h3>{{ pharmacie.nom }}</h3>
+                    <p class="carte-pharmacie__adresse">
+                      {{ pharmacie.adresse }}
+                    </p>
+                    <p class="carte-pharmacie__zone">
+                      {{ pharmacie.nomQuartier }} · {{ pharmacie.nomZone }}
+                      @if (pharmacie.distanceKm != null) {
+                        · <strong>{{ pharmacie.distanceKm | number: '1.1-1' }} km</strong>
+                      }
+                    </p>
+                  </div>
+                </div>
+
+                <div class="carte-pharmacie__bas">
+                  <span class="carte-pharmacie__horaires">
+                    {{ pharmacie.horaireOuverture }} — {{ pharmacie.horaireFermeture }}
+                  </span>
+                  <div class="carte-pharmacie__actions">
+                    <a [href]="lienAppel(pharmacie.telephone)" class="btn btn--primaire">
+                      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                        <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.68 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.9.32 1.85.55 2.81.68A2 2 0 0 1 22 16.92z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                      </svg>
+                      {{ pharmacie.telephone }}
+                    </a>
+                    @if (pharmacie.latitude != null && pharmacie.longitude != null) {
+                      <a [href]="lienItinerairePublique(pharmacie)" target="_blank" rel="noopener" class="btn btn--secondaire">
+                        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                          <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                          <circle cx="12" cy="10" r="3" stroke="currentColor" stroke-width="2"/>
+                        </svg>
+                        Itinéraire
+                      </a>
+                    } @else {
+                      <span class="carte-pharmacie__sans-position">Position non renseignée</span>
+                    }
+                  </div>
+                </div>
+              </article>
+            }
+          </div>
+        }
       }
     </div>
   </main>
