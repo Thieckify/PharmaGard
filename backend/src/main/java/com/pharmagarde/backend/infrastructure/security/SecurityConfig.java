@@ -1,5 +1,6 @@
 package com.pharmagarde.backend.infrastructure.security;
 
+import com.pharmagarde.backend.infrastructure.ai.RateLimitFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -28,13 +29,16 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class SecurityConfig {
 
     private final JwtAuthFilter jwtAuthFilter;
+    private final RateLimitFilter rateLimitFilter;
     private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
     private final JwtAccessDeniedHandler jwtAccessDeniedHandler;
 
     public SecurityConfig(JwtAuthFilter jwtAuthFilter,
+                           RateLimitFilter rateLimitFilter,
                            JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint,
                            JwtAccessDeniedHandler jwtAccessDeniedHandler) {
         this.jwtAuthFilter = jwtAuthFilter;
+        this.rateLimitFilter = rateLimitFilter;
         this.jwtAuthenticationEntryPoint = jwtAuthenticationEntryPoint;
         this.jwtAccessDeniedHandler = jwtAccessDeniedHandler;
     }
@@ -79,6 +83,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/public/**").permitAll()
 
                         // Assistant conversationnel : public, aucune authentification requise
+                        // (limité en fréquence par RateLimitFilter, cf. plus bas)
                         .requestMatchers("/api/assistant").permitAll()
 
                         // Documentation Swagger : /swagger-ui.html est l'adresse d'entrée (elle redirige
@@ -124,6 +129,10 @@ public class SecurityConfig {
                 .exceptionHandling(exception -> exception
                         .authenticationEntryPoint(jwtAuthenticationEntryPoint)
                         .accessDeniedHandler(jwtAccessDeniedHandler))
+
+                // La limite de fréquence de l'assistant se vérifie avant même l'authentification :
+                // elle doit bloquer un excès d'appels quel que soit le résultat de l'auth ensuite.
+                .addFilterBefore(rateLimitFilter, UsernamePasswordAuthenticationFilter.class)
 
                 // Insertion de notre filtre JWT avant le filtre standard de Spring Security,
                 // pour que l'authentification soit posée dans le contexte AVANT
