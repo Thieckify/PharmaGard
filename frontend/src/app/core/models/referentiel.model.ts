@@ -4,4 +4,7 @@ export interface Quartier {
   nom: string;
   zoneId: number;
   nomZone: string;
+  // Centre approximatif du quartier (null si inconnu) : sert à ouvrir les cartes au bon endroit
+  latitude: number | null;
+  longitude: number | null;
 }

@@ -10,15 +10,18 @@ import { AuthService } from '../../../core/services/auth.service';
 import { ReferentielService } from '../../../core/services/referentiel.service';
 import { Quartier } from '../../../core/models/referentiel.model';
 import { RegisterRequest } from '../../../core/models/auth.model';
+import { PositionGps, SelecteurPosition } from '../../../shared/components/selecteur-position/selecteur-position';
 
 // Page d'inscription self-service d'un pharmacien : crée le compte ET la fiche pharmacie
 // en un seul envoi (POST /api/auth/register, transaction "tout ou rien" côté backend),
 // puis connecte directement l'utilisateur. La fiche reste inactive jusqu'à validation par
 // un superviseur (RG-05). Sélection en cascade zone -> quartier, comme dans Formulaire.
+// La position de la pharmacie se choisit sur une carte (SelecteurPosition), jamais à la main :
+// la carte s'ouvre sur le quartier choisi, et changer de quartier retire l'ancien repère.
 @Component({
   selector: 'app-register',
   standalone: true,
-  imports: [ReactiveFormsModule, RouterLink, InputTextModule, PasswordModule, Select, MessageModule],
+  imports: [ReactiveFormsModule, RouterLink, InputTextModule, PasswordModule, Select, MessageModule, SelecteurPosition],
   templateUrl: './register.html',
   styleUrl: './register.scss'
 })
@@ -34,6 +37,13 @@ export class Register implements OnInit {
 
   zones = signal<{ id: number; nom: string }[]>([]);
   quartiersFiltres = signal<Quartier[]>([]);
+
+  // Position choisie sur la carte (null tant que l'utilisateur n'a rien placé). Un signal
+  // et non un champ du formulaire : elle pilote l'affichage de la carte (mode zoneless).
+  position = signal<PositionGps | null>(null);
+
+  // Centre du quartier choisi : la carte s'ouvre dessus (null si aucun quartier ou centre inconnu)
+  centreCarte = signal<PositionGps | null>(null);
 
   envoiEnCours = signal(false);
   // Erreur métier propre au champ email (409 : compte déjà existant), affichée sous ce champ
@@ -79,8 +89,25 @@ export class Register implements OnInit {
       this.formulaire.controls.quartierId.setValue(null);
     });
 
+    // Changer de quartier (ou le vider) : l'ancienne position n'a plus de sens, on la retire,
+    // et la carte s'ouvre sur le centre du nouveau quartier (s'il est connu)
+    this.formulaire.controls.quartierId.valueChanges.subscribe((quartierId) => {
+      this.position.set(null);
+      const quartier = this.tousLesQuartiers.find(q => q.id === quartierId);
+      this.centreCarte.set(
+        quartier?.latitude != null && quartier?.longitude != null
+          ? { latitude: quartier.latitude, longitude: quartier.longitude }
+          : null
+      );
+    });
+
     // Dès que l'utilisateur corrige son email, l'erreur "compte déjà existant" n'a plus lieu d'être
     this.formulaire.controls.email.valueChanges.subscribe(() => this.erreurEmail.set(null));
+  }
+
+  // Appelé par le sélecteur quand l'utilisateur clique, glisse le repère ou utilise sa position
+  onPositionChange(position: PositionGps): void {
+    this.position.set(position);
   }
 
   onSubmit(): void {
@@ -98,8 +125,8 @@ export class Register implements OnInit {
     this.erreurEmail.set(null);
     this.messageErreur.set(null);
 
-    // Le rôle n'est jamais envoyé : le backend force PHARMACIEN. Latitude/longitude restent
-    // à null tant que le sélecteur de position sur carte n'est pas branché.
+    // Le rôle n'est jamais envoyé : le backend force PHARMACIEN. La position reste à null
+    // si l'utilisateur n'a rien placé sur la carte (facultatif côté backend).
     const requete: RegisterRequest = {
       email: v.email.trim(),
       password: v.password,
@@ -107,8 +134,8 @@ export class Register implements OnInit {
         nom: v.nom.trim(),
         adresse: v.adresse.trim(),
         quartierId: v.quartierId,
-        latitude: null,
-        longitude: null,
+        latitude: this.position()?.latitude ?? null,
+        longitude: this.position()?.longitude ?? null,
         telephone: v.telephone.trim() || null,
         horaireOuverture: v.horaireOuverture.trim() || null,
         horaireFermeture: v.horaireFermeture.trim() || null,

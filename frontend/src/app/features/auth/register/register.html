@@ -37,7 +37,7 @@
         <div class="bloc__entete">
           <span class="etape-numero">1</span>
           <div>
-            <h2>Votre compte<span class="accent-dot">.</span></h2>
+            <h2>Votre compte</h2>
             <p>Ces identifiants vous serviront à vous connecter.</p>
           </div>
         </div>
@@ -71,7 +71,7 @@
         <div class="bloc__entete">
           <span class="etape-numero">2</span>
           <div>
-            <h2>Votre pharmacie<span class="accent-dot">.</span></h2>
+            <h2>Votre pharmacie</h2>
             <p>Ces informations seront visibles du public après validation.</p>
           </div>
         </div>
@@ -91,8 +91,6 @@
             <p class="erreur-champ">L'adresse est obligatoire.</p>
           }
         </div>
-
-        <!-- Emplacement prévu pour le sélecteur de position sur carte (étape suivante) -->
 
         <div class="champ-groupe">
           <div class="champ">
@@ -114,6 +112,17 @@
             }
           </div>
         </div>
+
+        <app-selecteur-position
+          [latitude]="position()?.latitude ?? null"
+          [longitude]="position()?.longitude ?? null"
+          [centre]="centreCarte()"
+          (positionChange)="onPositionChange($event)" />
+        <p class="champ__aide">
+          Facultatif, mais sans position votre pharmacie n'apparaîtra pas sur la carte du site.
+          La carte s'ouvre sur votre quartier dès que vous l'avez choisi ; si vous changez de
+          quartier, le repère est retiré.
+        </p>
 
         <div class="champ">
           <label for="telephone">Téléphone</label>
