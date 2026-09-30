@@ -118,11 +118,15 @@
           [longitude]="position()?.longitude ?? null"
           [centre]="centreCarte()"
           (positionChange)="onPositionChange($event)" />
-        <p class="champ__aide">
-          Facultatif, mais sans position votre pharmacie n'apparaîtra pas sur la carte du site.
-          La carte s'ouvre sur votre quartier dès que vous l'avez choisi ; si vous changez de
-          quartier, le repère est retiré.
-        </p>
+        @if (positionManquante()) {
+          <p class="erreur-champ">Placez votre pharmacie sur la carte pour continuer.</p>
+        } @else {
+          <p class="champ__aide">
+            Obligatoire : c'est elle qui place votre pharmacie sur la carte du site. La carte
+            s'ouvre sur votre quartier dès que vous l'avez choisi ; si vous changez de quartier,
+            le repère est retiré.
+          </p>
+        }
 
         <div class="champ">
           <label for="telephone">Téléphone</label>

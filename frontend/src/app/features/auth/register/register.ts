@@ -16,8 +16,9 @@ import { PositionGps, SelecteurPosition } from '../../../shared/components/selec
 // en un seul envoi (POST /api/auth/register, transaction "tout ou rien" côté backend),
 // puis connecte directement l'utilisateur. La fiche reste inactive jusqu'à validation par
 // un superviseur (RG-05). Sélection en cascade zone -> quartier, comme dans Formulaire.
-// La position de la pharmacie se choisit sur une carte (SelecteurPosition), jamais à la main :
-// la carte s'ouvre sur le quartier choisi, et changer de quartier retire l'ancien repère.
+// La position de la pharmacie se choisit sur une carte (SelecteurPosition), jamais à la main,
+// et elle est obligatoire (RG-14) : la carte s'ouvre sur le quartier choisi, et changer de
+// quartier retire l'ancien repère.
 @Component({
   selector: 'app-register',
   standalone: true,
@@ -44,6 +45,9 @@ export class Register implements OnInit {
 
   // Centre du quartier choisi : la carte s'ouvre dessus (null si aucun quartier ou centre inconnu)
   centreCarte = signal<PositionGps | null>(null);
+
+  // Vrai quand l'utilisateur a tenté d'envoyer le formulaire sans avoir placé sa pharmacie
+  positionManquante = signal(false);
 
   envoiEnCours = signal(false);
   // Erreur métier propre au champ email (409 : compte déjà existant), affichée sous ce champ
@@ -108,10 +112,16 @@ export class Register implements OnInit {
   // Appelé par le sélecteur quand l'utilisateur clique, glisse le repère ou utilise sa position
   onPositionChange(position: PositionGps): void {
     this.position.set(position);
+    this.positionManquante.set(false);
   }
 
   onSubmit(): void {
-    if (this.formulaire.invalid) {
+    // La position est obligatoire (RG-14) : on l'affiche comme les autres champs manquants,
+    // en même temps qu'eux, plutôt que de laisser le serveur la refuser
+    const position = this.position();
+    this.positionManquante.set(position == null);
+
+    if (this.formulaire.invalid || position == null) {
       this.formulaire.markAllAsTouched();
       return;
     }
@@ -125,8 +135,7 @@ export class Register implements OnInit {
     this.erreurEmail.set(null);
     this.messageErreur.set(null);
 
-    // Le rôle n'est jamais envoyé : le backend force PHARMACIEN. La position reste à null
-    // si l'utilisateur n'a rien placé sur la carte (facultatif côté backend).
+    // Le rôle n'est jamais envoyé : le backend force PHARMACIEN
     const requete: RegisterRequest = {
       email: v.email.trim(),
       password: v.password,
@@ -134,8 +143,8 @@ export class Register implements OnInit {
         nom: v.nom.trim(),
         adresse: v.adresse.trim(),
         quartierId: v.quartierId,
-        latitude: this.position()?.latitude ?? null,
-        longitude: this.position()?.longitude ?? null,
+        latitude: position.latitude,
+        longitude: position.longitude,
         telephone: v.telephone.trim() || null,
         horaireOuverture: v.horaireOuverture.trim() || null,
         horaireFermeture: v.horaireFermeture.trim() || null,

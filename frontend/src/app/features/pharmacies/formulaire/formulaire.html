@@ -55,6 +55,22 @@
       </div>
 
       <div class="champ">
+        <app-selecteur-position
+          [latitude]="position()?.latitude ?? null"
+          [longitude]="position()?.longitude ?? null"
+          [centre]="centreCarte()"
+          (positionChange)="onPositionChange($event)" />
+        @if (positionManquante()) {
+          <p class="erreur-champ">Placez votre pharmacie sur la carte pour enregistrer.</p>
+        } @else {
+          <p class="champ__aide">
+            Obligatoire. La carte s'ouvre sur votre quartier dès que vous l'avez choisi ; si vous
+            changez de quartier, le repère est retiré.
+          </p>
+        }
+      </div>
+
+      <div class="champ">
         <label for="telephone">Téléphone</label>
         <input id="telephone" type="text" formControlName="telephone" />
       </div>
