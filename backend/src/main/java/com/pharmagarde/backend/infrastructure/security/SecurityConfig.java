@@ -78,6 +78,9 @@ public class SecurityConfig {
                         // Endpoints publics métier (recherche de pharmacies de garde, etc.)
                         .requestMatchers("/api/public/**").permitAll()
 
+                        // Assistant conversationnel : public, aucune authentification requise
+                        .requestMatchers("/api/assistant").permitAll()
+
                         // Documentation Swagger : /swagger-ui.html est l'adresse d'entrée (elle redirige
                         // vers /swagger-ui/index.html), que le motif /swagger-ui/** ne couvre pas.
                         // En production, springdoc est désactivé : ces routes n'existent alors plus.
