@@ -25,18 +25,21 @@
 .nav {
   background: var(--pg-primary-900);
 
+  // Trois colonnes : logo à gauche, liens au milieu, bouton tout à droite. Le bouton est
+  // toujours dans la dernière colonne : quand la place manque, ce sont les liens (colonne du
+  // milieu) qui se resserrent, jamais le bouton qui passe sous le logo.
   &__inner {
     max-width: var(--largeur);
     margin: 0 auto;
     padding: var(--pg-space-md) var(--pg-space-xl);
-    display: flex;
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
     align-items: center;
-    justify-content: space-between;
-    gap: var(--pg-space-md);
-    flex-wrap: wrap;
+    column-gap: var(--pg-space-md);
   }
 
   &__logo {
+    grid-column: 1;
     display: flex;
     align-items: center;
     gap: var(--pg-space-xs);
@@ -44,10 +47,21 @@
     color: white;
   }
 
+  // Si les liens ne tiennent vraiment pas, ils défilent sur place (barre de défilement
+  // masquée) plutôt que de repousser le bouton
   &__liens {
+    grid-column: 2;
     display: flex;
     align-items: center;
-    gap: var(--pg-space-xs);
+    gap: 2px;
+    min-width: 0;
+    padding-left: var(--pg-space-sm);
+    overflow-x: auto;
+    scrollbar-width: none;
+
+    &::-webkit-scrollbar {
+      display: none;
+    }
   }
 
   &__lien {
@@ -74,6 +88,8 @@
   }
 
   &__bouton {
+    grid-column: 3;
+    justify-self: end;
     font: inherit;
     font-size: 0.875rem;
     font-weight: 500;
@@ -252,11 +268,27 @@
     --profondeur-carte: var(--pg-space-xl);
   }
 
-  // Les liens passent sur leur propre ligne, sous le logo et le bouton
+  // Logo et bouton restent sur la première ligne (le bouton toujours à droite) ; les liens
+  // passent sur leur propre ligne, en dessous
+  .nav__inner {
+    grid-template-columns: minmax(0, 1fr) auto;
+    row-gap: var(--pg-space-xs);
+  }
+
+  .nav__logo {
+    grid-column: 1;
+    grid-row: 1;
+  }
+
+  .nav__bouton {
+    grid-column: 2;
+    grid-row: 1;
+  }
+
   .nav__liens {
-    order: 3;
-    width: 100%;
-    overflow-x: auto;
+    grid-column: 1 / -1;
+    grid-row: 2;
+    padding-left: 0;
   }
 
   .hero h1 {
