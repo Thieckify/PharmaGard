@@ -79,6 +79,8 @@ public class PharmacieService {
                 entity.setValideLe(null);
             }
 
+            // Le numéro d'agrément n'est jamais modifié après la création : c'est la preuve
+            // déclarative fixée à l'inscription, elle ne se renvoie pas lors d'une mise à jour.
             entity.setNom(request.nom());
             entity.setAdresse(request.adresse());
             entity.setQuartier(quartier);
@@ -89,7 +91,16 @@ public class PharmacieService {
             entity.setHoraireOuverture(request.horaireOuverture());
             entity.setHoraireFermeture(request.horaireFermeture());
         } else {
-            // Création : nouvelle fiche, inactive par défaut (en attente de validation)
+            // Création : le numéro d'agrément est obligatoire (preuve déclarative d'exercice
+            // légal). PharmacieRequest ne le valide plus, puisqu'une mise à jour n'a pas à le
+            // renvoyer : c'est donc ici, à la création, qu'on l'exige.
+            String numeroAgrement = request.numeroAgrementOrdre();
+            if (numeroAgrement == null || numeroAgrement.isBlank()) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                        "Le numéro d'agrément est obligatoire à la création de la fiche");
+            }
+
+            // Nouvelle fiche, inactive par défaut (en attente de validation)
             UserEntity tenantUser = userRepository.findById(userId)
                     .orElseThrow(() -> new IllegalArgumentException("Utilisateur introuvable : " + userId));
 
@@ -105,7 +116,7 @@ public class PharmacieService {
             entity.setHoraireFermeture(request.horaireFermeture());
             entity.setActive(false);
             entity.setTenantUser(tenantUser);
-            entity.setNumeroAgrementOrdre(request.numeroAgrementOrdre());
+            entity.setNumeroAgrementOrdre(numeroAgrement.trim());
         }
 
         // 4. Sauvegarde en base (save() fait un INSERT si l'id est vide, un UPDATE sinon)
