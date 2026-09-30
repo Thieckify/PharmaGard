@@ -31,11 +31,12 @@ export const routes: Routes = [
     loadComponent: () => import('./features/dashboard/dashboard').then(m => m.Dashboard),
     canActivate: [authGuard]
   },
-  // Liste des pharmacies : réservée aux PHARMACIEN et SUPERVISEUR (même restriction que côté backend)
+  // Liste des pharmacies : réservée au SUPERVISEUR, dont c'est l'outil de modération (agrément,
+  // validation, suppression, carte). Un pharmacien n'en a pas besoin : sa fiche est dans "Ma fiche".
   {
     path: 'pharmacies',
     loadComponent: () => import('./features/pharmacies/liste/liste').then(m => m.Liste),
-    canActivate: [authGuard, roleGuard(['PHARMACIEN', 'SUPERVISEUR'])]
+    canActivate: [authGuard, roleGuard(['SUPERVISEUR'])]
   },
   // Formulaire de création/mise à jour de sa fiche pharmacie : réservé au PHARMACIEN
   {

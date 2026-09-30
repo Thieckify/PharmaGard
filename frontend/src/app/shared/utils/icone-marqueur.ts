@@ -32,8 +32,8 @@ function goutte(couleur: string): L.DivIcon {
   });
 }
 
-// Fiche validée : teal, la couleur principale de l'application
-export const ICONE_VALIDEE = goutte('var(--pg-primary-600)');
+// Fiche validée : le vert des statuts, le même que la pastille "Validée" des pages
+export const ICONE_VALIDEE = goutte('var(--pg-success)');
 
 // Fiche en attente de validation : doré, pour attirer l'œil du superviseur
 export const ICONE_ATTENTE = goutte('var(--pg-accent-gold)');

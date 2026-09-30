@@ -1,59 +1,19 @@
-.page-wrapper {
-  min-height: 100vh;
-  background: linear-gradient(180deg, var(--pg-primary-50) 0%, var(--pg-surface-50) 400px);
-}
+@use '../../../shared/styles/statut';
 
-.page {
-  max-width: 760px;
-  margin: 0 auto;
-  padding: var(--pg-space-2xl) var(--pg-space-xl);
-}
-
-.page-header {
-  margin-bottom: var(--pg-space-xl);
-
-  &__eyebrow {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    font-size: 0.8125rem;
-    font-weight: 600;
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
-    color: var(--pg-primary-600);
-    margin-bottom: var(--pg-space-xs);
-  }
-
-  h1 {
-    font-size: 2rem;
-    margin-bottom: var(--pg-space-xs);
-  }
-
-  &__subtitle {
-    color: var(--pg-surface-500);
-    margin: 0;
-  }
-}
-
-.accent-dot {
-  color: var(--pg-accent-gold);
-  font-size: 0.625rem;
-}
-
-.liste-pharmacies {
-  display: grid;
+// Bandeau de résumé (compteurs) : c'est lui qui remonte sur le bandeau sombre du layout
+.resume {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   gap: var(--pg-space-md);
-}
-
-.carte-pharmacie {
+  flex-wrap: wrap;
   background: var(--pg-surface-0);
   border: 1px solid var(--pg-surface-200);
   border-radius: var(--pg-radius-lg);
-  box-shadow: var(--pg-shadow-sm);
-  padding: var(--pg-space-lg);
+  box-shadow: var(--pg-shadow-lg);
+  padding: var(--pg-space-lg) var(--pg-space-xl);
   position: relative;
   overflow: hidden;
-  transition: box-shadow 0.2s ease, transform 0.2s ease;
 
   &::before {
     content: '';
@@ -65,70 +25,59 @@
     background: linear-gradient(90deg, var(--pg-primary-500), var(--pg-accent-gold));
   }
 
-  &:hover {
-    box-shadow: var(--pg-shadow-md);
-    transform: translateY(-1px);
-  }
-
-  &__top {
+  &__compteurs {
     display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-    gap: var(--pg-space-md);
-    margin-bottom: var(--pg-space-xs);
-
-    h3 {
-      font-size: 1.125rem;
-    }
+    gap: var(--pg-space-xl);
+    flex-wrap: wrap;
   }
 
-  &__adresse {
-    color: var(--pg-surface-500);
-    font-size: 0.9375rem;
-    margin: 0 0 var(--pg-space-sm);
-  }
-
-  &__meta {
-    display: flex;
-    justify-content: space-between;
+  &__astuce {
     font-size: 0.8125rem;
     color: var(--pg-surface-500);
-    border-top: 1px solid var(--pg-surface-100);
-    padding-top: var(--pg-space-sm);
   }
 }
 
-.statut {
+.compteur {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  padding: 4px 10px;
-  border-radius: 999px;
-  font-size: 0.75rem;
-  font-weight: 600;
-  white-space: nowrap;
-  background: var(--pg-surface-100);
+  gap: 8px;
+  font-size: 0.9375rem;
   color: var(--pg-surface-700);
 
-  &__point {
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    background: var(--pg-warning);
+  strong {
+    font-size: 1.25rem;
+    letter-spacing: -0.02em;
+    color: var(--pg-surface-900);
   }
 
-  &--active {
-    background: rgba(16, 185, 129, 0.1);
-    color: var(--pg-success);
+  &__point {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
 
-    .statut__point {
+    &--attente {
+      background: var(--pg-accent-gold);
+    }
+
+    &--validee {
       background: var(--pg-success);
     }
   }
 }
 
+// Chargement, erreur ou liste vide : même carte que le résumé, pour garder l'effet de superposition
+.bloc-etat {
+  background: var(--pg-surface-0);
+  border: 1px solid var(--pg-surface-200);
+  border-radius: var(--pg-radius-lg);
+  box-shadow: var(--pg-shadow-lg);
+  padding: var(--pg-space-xl);
+  text-align: center;
+}
+
 .etat-info,
 .etat-erreur {
+  margin: 0;
   color: var(--pg-surface-500);
 }
 
@@ -136,10 +85,317 @@
   color: var(--pg-error);
 }
 
-.etat-vide {
-  text-align: center;
-  padding: var(--pg-space-2xl) 0;
-  color: var(--pg-surface-500);
-  border: 1px dashed var(--pg-surface-300);
+// Retour d'une action (validation, suppression), en succès ou en erreur
+.message {
+  margin: var(--pg-space-md) 0 0;
+  padding: var(--pg-space-sm) var(--pg-space-md);
+  border-radius: var(--pg-radius-md);
+  font-size: 0.875rem;
+  color: var(--pg-success);
+  background: color-mix(in srgb, var(--pg-success) 10%, white);
+  border: 1px solid color-mix(in srgb, var(--pg-success) 30%, white);
+
+  &--erreur {
+    color: var(--pg-error);
+    background: color-mix(in srgb, var(--pg-error) 8%, white);
+    border-color: color-mix(in srgb, var(--pg-error) 30%, white);
+  }
+}
+
+// La liste, et à côté d'elle la carte pour le superviseur (deux colonnes égales, comme
+// sur l'espace public). Pour un pharmacien, il n'y a que la liste, sur une seule colonne.
+.corps {
+  display: grid;
+  gap: var(--pg-space-lg);
+  margin-top: var(--pg-space-lg);
+
+  &--avec-carte {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: start;
+  }
+}
+
+.liste-pharmacies {
+  display: grid;
+  gap: var(--pg-space-md);
+}
+
+// La colonne de la carte reste visible quand on fait défiler une longue liste
+.colonne-carte {
+  position: sticky;
+  top: var(--pg-space-lg);
+  display: flex;
+  flex-direction: column;
+  gap: var(--pg-space-sm);
+}
+
+// Même cadre que la carte de l'espace public : liseré signature en haut, au-dessus des
+// calques de Leaflet (leurs z-index montent jusqu'à 1000)
+.carte-panneau {
+  position: relative;
+  height: 560px;
   border-radius: var(--pg-radius-lg);
+  overflow: hidden;
+  box-shadow: var(--pg-shadow-md);
+  border: 1px solid var(--pg-surface-200);
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--pg-primary-500), var(--pg-accent-gold));
+    z-index: 1000;
+  }
+}
+
+.legende {
+  display: flex;
+  gap: var(--pg-space-lg);
+  font-size: 0.8125rem;
+  color: var(--pg-surface-500);
+
+  &__item {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  &__point {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+
+    &--attente {
+      background: var(--pg-accent-gold);
+    }
+
+    &--validee {
+      background: var(--pg-success);
+    }
+  }
+}
+
+.carte-note {
+  margin: 0;
+  font-size: 0.8125rem;
+  font-style: italic;
+  color: var(--pg-surface-500);
+}
+
+.carte-pharmacie {
+  background: var(--pg-surface-0);
+  border: 1px solid var(--pg-surface-200);
+  border-radius: var(--pg-radius-lg);
+  box-shadow: var(--pg-shadow-sm);
+  padding: var(--pg-space-xl);
+  position: relative;
+  overflow: hidden;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--pg-primary-500), var(--pg-accent-gold));
+  }
+
+  &__top {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--pg-space-lg);
+
+    h3 {
+      font-size: 1.25rem;
+      letter-spacing: -0.02em;
+      margin-bottom: 6px;
+    }
+  }
+
+  &__adresse {
+    color: var(--pg-surface-700);
+    font-size: 0.9375rem;
+    margin: 0 0 2px;
+  }
+
+  &__zone {
+    color: var(--pg-surface-500);
+    font-size: 0.8125rem;
+    margin: 0;
+  }
+
+  &__meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--pg-space-xs) var(--pg-space-lg);
+    margin-top: var(--pg-space-md);
+    font-size: 0.8125rem;
+    color: var(--pg-surface-500);
+    font-variant-numeric: tabular-nums;
+  }
+
+  &__note {
+    margin: var(--pg-space-sm) 0 0;
+    font-size: 0.8125rem;
+    font-style: italic;
+    color: var(--pg-surface-500);
+  }
+}
+
+// Le numéro d'agrément, mis en évidence : c'est la pièce que le superviseur contrôle avant de valider
+.agrement {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--pg-space-sm);
+  margin-top: var(--pg-space-md);
+  padding: var(--pg-space-sm) var(--pg-space-md);
+  background: var(--pg-surface-50);
+  border: 1px solid var(--pg-surface-200);
+  border-radius: var(--pg-radius-md);
+
+  &__label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--pg-surface-500);
+  }
+
+  &__valeur {
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    font-variant-numeric: tabular-nums;
+    color: var(--pg-surface-900);
+  }
+}
+
+.actions {
+  display: flex;
+  gap: var(--pg-space-sm);
+  flex-wrap: wrap;
+  margin-top: var(--pg-space-md);
+  padding-top: var(--pg-space-md);
+  border-top: 1px solid var(--pg-surface-100);
+}
+
+// Encadré de confirmation, à la place des boutons : la suppression est définitive
+.confirmation {
+  margin-top: var(--pg-space-md);
+  padding: var(--pg-space-md);
+  border-radius: var(--pg-radius-md);
+  background: color-mix(in srgb, var(--pg-error) 6%, white);
+  border: 1px solid color-mix(in srgb, var(--pg-error) 25%, white);
+  border-left: 3px solid var(--pg-error);
+
+  p {
+    margin: 0;
+    font-size: 0.875rem;
+    line-height: 1.5;
+    color: var(--pg-surface-700);
+  }
+
+  .actions {
+    border-top: none;
+    padding-top: 0;
+  }
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 16px;
+  border-radius: var(--pg-radius-md);
+  font: inherit;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition:
+    background 0.2s ease,
+    border-color 0.2s ease,
+    color 0.2s ease;
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: default;
+  }
+
+  &--primaire {
+    background: var(--pg-primary-600);
+    color: white;
+    border: 1px solid var(--pg-primary-600);
+
+    &:hover:not(:disabled) {
+      background: var(--pg-primary-700);
+    }
+  }
+
+  &--secondaire {
+    background: var(--pg-surface-0);
+    color: var(--pg-surface-700);
+    border: 1px solid var(--pg-surface-300);
+
+    &:hover:not(:disabled) {
+      border-color: var(--pg-primary-600);
+      color: var(--pg-primary-600);
+    }
+  }
+
+  // Suppression : contour rouge d'abord, rouge plein seulement dans la confirmation
+  &--danger {
+    background: var(--pg-surface-0);
+    color: var(--pg-error);
+    border: 1px solid color-mix(in srgb, var(--pg-error) 35%, white);
+
+    &:hover:not(:disabled) {
+      background: color-mix(in srgb, var(--pg-error) 8%, white);
+      border-color: var(--pg-error);
+    }
+  }
+
+  &--danger-plein {
+    background: var(--pg-error);
+    color: white;
+    border: 1px solid var(--pg-error);
+
+    &:hover:not(:disabled) {
+      filter: brightness(0.92);
+    }
+  }
+}
+
+@media (max-width: 760px) {
+  .resume {
+    padding: var(--pg-space-lg);
+  }
+
+  // Sur mobile : une seule colonne, avec la carte au-dessus de la liste, plus courte et
+  // qui ne reste plus collée
+  .corps--avec-carte {
+    grid-template-columns: 1fr;
+  }
+
+  .colonne-carte {
+    order: -1;
+    position: static;
+  }
+
+  .carte-panneau {
+    height: 320px;
+  }
+
+  .carte-pharmacie {
+    padding: var(--pg-space-lg);
+
+    &__top {
+      flex-direction: column;
+      gap: var(--pg-space-sm);
+    }
+  }
 }
