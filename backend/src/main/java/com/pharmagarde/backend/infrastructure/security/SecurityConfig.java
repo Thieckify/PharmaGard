@@ -87,6 +87,11 @@ public class SecurityConfig {
                         // qui correspond à l'URL, donc l'ordre ici n'est pas cosmétique.
                         .requestMatchers(HttpMethod.PATCH, "/api/pharmacies/*/validation").hasRole("SUPERVISEUR")
 
+                        // Suppression d'une pharmacie (RG-15) : réservée au SUPERVISEUR. Même remarque
+                        // sur l'ordre : sans cette règle placée avant la règle générale, un PHARMACIEN
+                        // pourrait supprimer une pharmacie, puisque la règle générale l'autorise.
+                        .requestMatchers(HttpMethod.DELETE, "/api/pharmacies/*").hasRole("SUPERVISEUR")
+
                         // Gestion des fiches pharmacie : réservé aux pharmaciens (upsert de leur fiche)
                         // et superviseurs (consultation), pas à un ADMIN qui n'a pas ce rôle métier
                         .requestMatchers("/api/pharmacies/**").hasAnyRole("PHARMACIEN", "SUPERVISEUR")
@@ -95,7 +100,7 @@ public class SecurityConfig {
                         // un SUPERVISEUR n'a pas à déclarer le planning à la place du pharmacien
                         .requestMatchers(HttpMethod.POST, "/api/gardes").hasRole("PHARMACIEN")
 
-                         // Consultation de son propre planning : même règle de rôle que la déclaration
+                        // Consultation de son propre planning : même règle de rôle que la déclaration
                         .requestMatchers(HttpMethod.GET, "/api/gardes").hasRole("PHARMACIEN")
 
                         // Modification/suppression d'une période de garde : même règle de rôle ;

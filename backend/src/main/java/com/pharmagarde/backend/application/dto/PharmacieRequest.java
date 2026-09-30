@@ -6,9 +6,9 @@ import jakarta.validation.constraints.NotNull;
 // Données envoyées par le pharmacien pour créer ou mettre à jour sa fiche pharmacie.
 // La position (latitude/longitude) est obligatoire (RG-14) : sans elle, la pharmacie ne
 // pourrait pas apparaître sur la carte du site.
-// Le numéro d'agrément n'est pas validé ici : il est exigé à la création uniquement
-// (vérifié dans PharmacieService) et ne se modifie plus ensuite, donc une mise à jour
-// n'a pas à le renvoyer.
+// Le numéro d'agrément n'est pas validé ici : il est exigé à la création (vérifié dans
+// PharmacieService). À la mise à jour, un numéro vide ou identique ne change rien, et un
+// numéro différent remet la fiche en attente de validation (RG-16).
 public record PharmacieRequest(
         @NotBlank String nom,
         @NotBlank String adresse,
