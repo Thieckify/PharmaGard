@@ -1,4 +1,5 @@
 @use '../../../shared/styles/statut';
+@use '../../../shared/styles/actions';
 
 // Bandeau de résumé (compteurs) : c'est lui qui remonte sur le bandeau sombre du layout
 .resume {
@@ -83,23 +84,6 @@
 
 .etat-erreur {
   color: var(--pg-error);
-}
-
-// Retour d'une action (validation, suppression), en succès ou en erreur
-.message {
-  margin: var(--pg-space-md) 0 0;
-  padding: var(--pg-space-sm) var(--pg-space-md);
-  border-radius: var(--pg-radius-md);
-  font-size: 0.875rem;
-  color: var(--pg-success);
-  background: color-mix(in srgb, var(--pg-success) 10%, white);
-  border: 1px solid color-mix(in srgb, var(--pg-success) 30%, white);
-
-  &--erreur {
-    color: var(--pg-error);
-    background: color-mix(in srgb, var(--pg-error) 8%, white);
-    border-color: color-mix(in srgb, var(--pg-error) 30%, white);
-  }
 }
 
 // La liste, et à côté d'elle la carte pour le superviseur (deux colonnes égales, comme
@@ -272,101 +256,6 @@
     letter-spacing: 0.02em;
     font-variant-numeric: tabular-nums;
     color: var(--pg-surface-900);
-  }
-}
-
-.actions {
-  display: flex;
-  gap: var(--pg-space-sm);
-  flex-wrap: wrap;
-  margin-top: var(--pg-space-md);
-  padding-top: var(--pg-space-md);
-  border-top: 1px solid var(--pg-surface-100);
-}
-
-// Encadré de confirmation, à la place des boutons : la suppression est définitive
-.confirmation {
-  margin-top: var(--pg-space-md);
-  padding: var(--pg-space-md);
-  border-radius: var(--pg-radius-md);
-  background: color-mix(in srgb, var(--pg-error) 6%, white);
-  border: 1px solid color-mix(in srgb, var(--pg-error) 25%, white);
-  border-left: 3px solid var(--pg-error);
-
-  p {
-    margin: 0;
-    font-size: 0.875rem;
-    line-height: 1.5;
-    color: var(--pg-surface-700);
-  }
-
-  .actions {
-    border-top: none;
-    padding-top: 0;
-  }
-}
-
-.btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 9px 16px;
-  border-radius: var(--pg-radius-md);
-  font: inherit;
-  font-size: 0.875rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition:
-    background 0.2s ease,
-    border-color 0.2s ease,
-    color 0.2s ease;
-
-  &:disabled {
-    opacity: 0.6;
-    cursor: default;
-  }
-
-  &--primaire {
-    background: var(--pg-primary-600);
-    color: white;
-    border: 1px solid var(--pg-primary-600);
-
-    &:hover:not(:disabled) {
-      background: var(--pg-primary-700);
-    }
-  }
-
-  &--secondaire {
-    background: var(--pg-surface-0);
-    color: var(--pg-surface-700);
-    border: 1px solid var(--pg-surface-300);
-
-    &:hover:not(:disabled) {
-      border-color: var(--pg-primary-600);
-      color: var(--pg-primary-600);
-    }
-  }
-
-  // Suppression : contour rouge d'abord, rouge plein seulement dans la confirmation
-  &--danger {
-    background: var(--pg-surface-0);
-    color: var(--pg-error);
-    border: 1px solid color-mix(in srgb, var(--pg-error) 35%, white);
-
-    &:hover:not(:disabled) {
-      background: color-mix(in srgb, var(--pg-error) 8%, white);
-      border-color: var(--pg-error);
-    }
-  }
-
-  &--danger-plein {
-    background: var(--pg-error);
-    color: white;
-    border: 1px solid var(--pg-error);
-
-    &:hover:not(:disabled) {
-      filter: brightness(0.92);
-    }
   }
 }
 
