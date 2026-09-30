@@ -14,6 +14,7 @@ import { ReferentielService } from '../../../core/services/referentiel.service';
 import { Quartier } from '../../../core/models/referentiel.model';
 import { trierParDistance, filtrerParRayon, RAYON_PROXIMITE_KM } from '../utils/distance.util';
 import { CartePharmacies } from '../../../shared/components/carte-pharmacies/carte-pharmacies';
+import { ChatAssistant } from '../../../shared/components/chat-assistant/chat-assistant';
 
 interface Coordonnees {
   latitude: number;
@@ -32,7 +33,7 @@ interface Coordonnees {
 @Component({
   selector: 'app-pharmacies-de-garde',
   standalone: true,
-  imports: [FormsModule, RouterLink, DatePicker, Select, DecimalPipe, CartePharmacies],
+  imports: [FormsModule, RouterLink, DatePicker, Select, DecimalPipe, CartePharmacies, ChatAssistant],
   templateUrl: './pharmacies-de-garde.html',
   styleUrl: './pharmacies-de-garde.scss'
 })
