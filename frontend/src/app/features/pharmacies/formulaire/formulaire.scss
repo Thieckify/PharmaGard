@@ -1,67 +1,7 @@
 @use '../../../shared/styles/formulaire';
+@use '../../../shared/styles/statut';
 
 .etat-info {
   color: var(--pg-surface-500);
   margin: 0;
-}
-
-// Pastille de statut de la fiche : même famille que sur la page publique.
-// Verte avec un halo qui pulse quand la fiche est validée, grise et fixe quand elle attend.
-.statut {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 6px 12px;
-  border-radius: 999px;
-  font-size: 0.75rem;
-  font-weight: 600;
-  white-space: nowrap;
-  background: rgba(16, 185, 129, 0.1);
-  color: var(--pg-success);
-
-  &__point {
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    background: var(--pg-success);
-    position: relative;
-
-    &::after {
-      content: '';
-      position: absolute;
-      inset: -4px;
-      border-radius: 50%;
-      background: var(--pg-success);
-      opacity: 0.35;
-      animation: pulse-statut 2s ease-out infinite;
-    }
-  }
-
-  &--attente {
-    background: var(--pg-surface-100);
-    color: var(--pg-surface-500);
-
-    .statut__point {
-      background: var(--pg-surface-500);
-
-      &::after {
-        display: none;
-      }
-    }
-  }
-}
-
-@keyframes pulse-statut {
-  0% {
-    transform: scale(0.6);
-    opacity: 0.4;
-  }
-  70% {
-    transform: scale(1.4);
-    opacity: 0;
-  }
-  100% {
-    transform: scale(1.4);
-    opacity: 0;
-  }
 }

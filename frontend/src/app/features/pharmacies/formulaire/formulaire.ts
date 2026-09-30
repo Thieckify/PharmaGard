@@ -16,8 +16,9 @@ import { PositionGps, SelecteurPosition } from '../../../shared/components/selec
  * Formulaire de création ou mise à jour de la fiche pharmacie du pharmacien connecté.
  * Un seul formulaire sert aux deux cas (upsert) : le backend décide de créer ou mettre à jour.
  * S'il existe déjà une fiche, le formulaire s'ouvre prérempli, avec son statut (validée ou en
- * attente) et un avertissement si un changement de zone la remettrait en attente (RG-11).
- * Le numéro d'agrément se saisit à la création seulement : il ne se modifie plus ensuite.
+ * attente). Deux modifications remettent une fiche validée en attente, parce qu'elles portent
+ * sur ce que le superviseur a contrôlé : la zone (RG-11) et le numéro d'agrément (RG-16) ;
+ * le formulaire prévient avant l'enregistrement.
  * La position se choisit sur une carte (SelecteurPosition) et elle est obligatoire (RG-14).
  */
 @Component({
@@ -44,8 +45,10 @@ export class Formulaire implements OnInit {
   chargement = signal(true);
   erreurChargement = signal<string | null>(null);
 
-  // Zone actuellement choisie dans le formulaire (sert à repérer un changement de zone)
+  // Zone et numéro d'agrément actuellement saisis dans le formulaire : des signaux, pour que
+  // les avertissements ci-dessous se mettent à jour à chaque frappe (mode zoneless)
   zoneChoisie = signal<number | null>(null);
+  agrementSaisi = signal('');
 
   // Vrai quand la zone choisie n'est plus celle de la fiche enregistrée : l'enregistrement
   // remettra la fiche en attente de validation par le superviseur de la nouvelle zone (RG-11)
@@ -53,6 +56,16 @@ export class Formulaire implements OnInit {
     const fiche = this.fiche();
     const zone = this.zoneChoisie();
     return fiche != null && zone != null && zone !== fiche.zoneId;
+  });
+
+  // Vrai quand le numéro saisi diffère de celui de la fiche (à la casse près, comme le serveur) :
+  // l'enregistrement remettra la fiche en attente, le superviseur devant revérifier (RG-16)
+  changementDAgrement = computed(() => {
+    const fiche = this.fiche();
+    const saisi = this.agrementSaisi().trim();
+    return fiche != null
+      && saisi !== ''
+      && saisi.toLowerCase() !== fiche.numeroAgrementOrdre.trim().toLowerCase();
   });
 
   // Position choisie sur la carte, centre du quartier choisi, et alerte "position manquante"
@@ -90,6 +103,11 @@ export class Formulaire implements OnInit {
     this.formulaire.controls.quartierId.valueChanges.subscribe((quartierId) => {
       this.position.set(null);
       this.centreCarte.set(this.centreDuQuartier(quartierId));
+    });
+
+    // Suit le numéro d'agrément tapé, pour l'avertissement de remise en attente
+    this.formulaire.controls.numeroAgrementOrdre.valueChanges.subscribe((numero) => {
+      this.agrementSaisi.set(numero ?? '');
     });
 
     // On charge les quartiers ET la fiche existante avant d'afficher le formulaire, pour
@@ -143,15 +161,15 @@ export class Formulaire implements OnInit {
       return;
     }
 
-    // Calculé avant l'envoi : après, la fiche rechargée aura déjà la nouvelle zone
+    // Calculés avant l'envoi : après, la fiche rechargée aura déjà la nouvelle zone et le nouveau numéro
     const zoneChangee = this.changementDeZone();
+    const agrementChange = this.changementDAgrement();
 
     this.envoiEnCours.set(true);
     this.messageSucces.set(null);
     this.messageErreur.set(null);
 
-    // La zone n'est pas envoyée : le backend la déduit du quartier. Le numéro d'agrément est
-    // vide quand la fiche existe déjà : le backend l'ignore (il ne se modifie plus).
+    // La zone n'est pas envoyée : le backend la déduit du quartier
     const requete: PharmacieRequest = {
       nom: (v.nom ?? '').trim(),
       adresse: (v.adresse ?? '').trim(),
@@ -166,11 +184,7 @@ export class Formulaire implements OnInit {
 
     this.pharmacieService.upsertPharmacie(requete).subscribe({
       next: () => {
-        this.messageSucces.set(
-          zoneChangee
-            ? 'Fiche enregistrée. Comme vous avez changé de zone, elle repasse en attente de validation.'
-            : 'Fiche pharmacie enregistrée avec succès.'
-        );
+        this.messageSucces.set(this.messageDeSucces(zoneChangee, agrementChange));
         this.envoiEnCours.set(false);
         this.actualiserFiche();
       },
@@ -188,6 +202,7 @@ export class Formulaire implements OnInit {
   private preremplir(fiche: Pharmacie): void {
     this.fiche.set(fiche);
     this.zoneChoisie.set(fiche.zoneId);
+    this.agrementSaisi.set(fiche.numeroAgrementOrdre);
     this.quartiersFiltres.set(this.tousLesQuartiers.filter(q => q.zoneId === fiche.zoneId));
 
     this.formulaire.patchValue({
@@ -197,10 +212,9 @@ export class Formulaire implements OnInit {
       quartierId: fiche.quartierId,
       telephone: fiche.telephone ?? '',
       horaireOuverture: fiche.horaireOuverture ?? '',
-      horaireFermeture: fiche.horaireFermeture ?? ''
+      horaireFermeture: fiche.horaireFermeture ?? '',
+      numeroAgrementOrdre: fiche.numeroAgrementOrdre
     }, { emitEvent: false });
-
-    this.verrouillerAgrement();
 
     if (fiche.latitude != null && fiche.longitude != null) {
       // La carte s'ouvre directement sur le repère de la pharmacie
@@ -212,25 +226,27 @@ export class Formulaire implements OnInit {
     }
   }
 
-  // Une fois la fiche créée, le numéro d'agrément n'est plus demandé
-  private verrouillerAgrement(): void {
-    const agrement = this.formulaire.controls.numeroAgrementOrdre;
-    agrement.clearValidators();
-    agrement.updateValueAndValidity({ emitEvent: false });
-  }
-
-  // Recharge la fiche après un enregistrement, pour mettre à jour le statut affiché et la
-  // zone de référence (et masquer le champ d'agrément si la fiche vient d'être créée)
+  // Recharge la fiche après un enregistrement, pour mettre à jour le statut affiché et les
+  // valeurs de référence des avertissements (zone, numéro d'agrément)
   private actualiserFiche(): void {
     this.pharmacieService.listPharmacies().subscribe({
-      next: (fiches) => {
-        const fiche = fiches[0] ?? null;
-        this.fiche.set(fiche);
-        if (fiche) {
-          this.verrouillerAgrement();
-        }
-      }
+      next: (fiches) => this.fiche.set(fiches[0] ?? null)
     });
+  }
+
+  // Message affiché après un enregistrement réussi : dit clairement si la fiche est repassée
+  // en attente, et pourquoi
+  private messageDeSucces(zoneChangee: boolean, agrementChange: boolean): string {
+    if (zoneChangee && agrementChange) {
+      return 'Fiche enregistrée. Comme vous avez changé de zone et de numéro d\'agrément, elle repasse en attente de validation.';
+    }
+    if (zoneChangee) {
+      return 'Fiche enregistrée. Comme vous avez changé de zone, elle repasse en attente de validation.';
+    }
+    if (agrementChange) {
+      return 'Fiche enregistrée. Comme vous avez modifié votre numéro d\'agrément, elle repasse en attente de validation.';
+    }
+    return 'Fiche pharmacie enregistrée avec succès.';
   }
 
   // Centre approximatif d'un quartier, ou null s'il est inconnu

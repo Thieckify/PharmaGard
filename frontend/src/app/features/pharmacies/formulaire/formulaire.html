@@ -99,18 +99,19 @@
         </div>
       </div>
 
-      @if (fiche() == null) {
-        <div class="champ">
-          <label for="numeroAgrementOrdre">Numéro d'agrément (Ordre National des Pharmaciens)</label>
-          <input pInputText id="numeroAgrementOrdre" type="text" formControlName="numeroAgrementOrdre"
-            placeholder="ONP-SN-2026-000" />
-          @if (formulaire.controls.numeroAgrementOrdre.invalid && formulaire.controls.numeroAgrementOrdre.touched) {
-            <p class="erreur-champ">Le numéro d'agrément est obligatoire.</p>
-          }
-        </div>
-      } @else {
-        <p class="champ__aide">
-          Votre numéro d'agrément est enregistré : il ne peut plus être modifié.
+      <div class="champ">
+        <label for="numeroAgrementOrdre">Numéro d'agrément (Ordre National des Pharmaciens)</label>
+        <input pInputText id="numeroAgrementOrdre" type="text" formControlName="numeroAgrementOrdre"
+          placeholder="ONP-SN-2026-000" />
+        @if (formulaire.controls.numeroAgrementOrdre.invalid && formulaire.controls.numeroAgrementOrdre.touched) {
+          <p class="erreur-champ">Le numéro d'agrément est obligatoire.</p>
+        }
+      </div>
+
+      @if (changementDAgrement()) {
+        <p class="alerte">
+          Modifier votre numéro d'agrément remet votre fiche en attente de validation : un
+          superviseur devra contrôler le nouveau numéro avant qu'elle réapparaisse sur le site.
         </p>
       }
 
