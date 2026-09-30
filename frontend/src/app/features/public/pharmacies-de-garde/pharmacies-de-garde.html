@@ -16,64 +16,148 @@
 
   <header class="hero">
     <div class="hero__inner">
-      <div class="hero__eyebrow">
-        <span class="accent-dot">●</span>
-        Service public — Dakar
-      </div>
-      <h1>
-        Trouvez une pharmacie de garde<br />
-        <span class="accent">ouverte maintenant</span><span class="accent-dot">.</span>
-      </h1>
-      <p class="hero__subtitle">
-        Consultez les pharmacies assurant le service de garde à Dakar, nuit et jours fériés compris.
-        Aucune inscription nécessaire.
-      </p>
-
-      <div class="recherche">
-        <div class="recherche__onglets">
-          <button type="button" class="onglet" [class.onglet--actif]="modeRecherche() === 'date'" (click)="onModeChange('date')">
-            Par date
-          </button>
-          <button type="button" class="onglet" [class.onglet--actif]="modeRecherche() === 'quartier'" (click)="onModeChange('quartier')">
-            Par quartier
-          </button>
+      <div class="hero__content">
+        <div class="hero__eyebrow">
+          <span class="accent-dot">●</span>
+          Service public — Dakar
         </div>
+        <h1>
+          Trouvez une pharmacie de garde<br />
+          <span class="accent">ouverte maintenant</span><span class="accent-dot">.</span>
+        </h1>
+        <p class="hero__subtitle">
+          Consultez les pharmacies assurant le service de garde à Dakar, nuit et jours fériés compris.
+          Aucune inscription nécessaire.
+        </p>
 
-        @if (modeRecherche() === 'date') {
-          <label for="date-garde">Date de recherche</label>
-          <p-datepicker
-            inputId="date-garde"
-            [ngModel]="dateSelectionnee()"
-            (ngModelChange)="onDateChange($event)"
-            dateFormat="dd/mm/yy"
-            [showIcon]="true"
-          />
-        } @else {
-          <label for="quartier-recherche">Quartier</label>
-          <p-select
-            inputId="quartier-recherche"
-            [options]="quartiers()"
-            optionLabel="nom"
-            optionValue="id"
-            placeholder="Tous les quartiers"
-            [showClear]="true"
-            [ngModel]="quartierSelectionne()"
-            (ngModelChange)="onQuartierChange($event)"
-          />
+        <div class="hero__stats">
+          <div class="stat-item">
+            <span class="stat-item__icone">
+              <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                <circle cx="12" cy="10" r="3" stroke="currentColor" stroke-width="2"/>
+              </svg>
+            </span>
+            <div>
+              <div class="stat-item__valeur">39</div>
+              <div class="stat-item__label">quartiers couverts</div>
+            </div>
+          </div>
 
-          <button type="button" class="btn-position" (click)="utiliserMaPosition()" [disabled]="chargementPosition()">
-            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
-              <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-              <circle cx="12" cy="10" r="3" stroke="currentColor" stroke-width="2"/>
-            </svg>
-            {{ chargementPosition() ? 'Localisation...' : 'Utiliser ma position' }}
-          </button>
+          <div class="stat-item">
+            <span class="stat-item__icone">
+              <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <rect x="3" y="3" width="7" height="7" rx="1" stroke="currentColor" stroke-width="2"/>
+                <rect x="14" y="3" width="7" height="7" rx="1" stroke="currentColor" stroke-width="2"/>
+                <rect x="3" y="14" width="7" height="7" rx="1" stroke="currentColor" stroke-width="2"/>
+                <rect x="14" y="14" width="7" height="7" rx="1" stroke="currentColor" stroke-width="2"/>
+              </svg>
+            </span>
+            <div>
+              <div class="stat-item__valeur">11</div>
+              <div class="stat-item__label">zones de garde</div>
+            </div>
+          </div>
 
-          @if (erreurPosition()) {
-            <p class="erreur-position">{{ erreurPosition() }}</p>
-          }
-        }
+          <div class="stat-item">
+            <span class="stat-item__icone">
+              <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2"/>
+                <path d="M12 7v5l3 3" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </span>
+            <div>
+              <div class="stat-item__valeur">24h/24</div>
+              <div class="stat-item__label">nuit &amp; jours fériés</div>
+            </div>
+          </div>
+        </div>
       </div>
+
+      <aside class="hero__aside">
+        <div class="recherche">
+          <div class="recherche__onglets">
+            <button type="button" class="onglet" [class.onglet--actif]="modeRecherche() === 'date'" (click)="onModeChange('date')">
+              <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2"/>
+                <path d="M12 7v5l3 3" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+              Par date
+            </button>
+            <button type="button" class="onglet" [class.onglet--actif]="modeRecherche() === 'quartier'" (click)="onModeChange('quartier')">
+              <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                <circle cx="12" cy="10" r="3" stroke="currentColor" stroke-width="2"/>
+              </svg>
+              Par quartier
+            </button>
+          </div>
+
+          @if (modeRecherche() === 'date') {
+            <div class="recherche__champs">
+              <div class="champ">
+                <label for="date-garde">Date</label>
+                <p-datepicker
+                  inputId="date-garde"
+                  [ngModel]="dateSelectionnee()"
+                  (ngModelChange)="onDateChange($event)"
+                  dateFormat="dd/mm/yy"
+                  [showIcon]="true"
+                />
+              </div>
+              <div class="champ">
+                <label for="quartier-garde-filtre">Quartier</label>
+                <p-select
+                  inputId="quartier-garde-filtre"
+                  [options]="quartiers()"
+                  optionLabel="nom"
+                  optionValue="id"
+                  placeholder="Tous"
+                  [showClear]="true"
+                  [ngModel]="quartierFiltreDate()"
+                  (ngModelChange)="onQuartierFiltreDateChange($event)"
+                />
+              </div>
+            </div>
+
+            <button type="button" class="btn-position" (click)="utiliserMaPositionDate()" [disabled]="chargementPositionDate()">
+              <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                <circle cx="12" cy="10" r="3" stroke="currentColor" stroke-width="2"/>
+              </svg>
+              {{ chargementPositionDate() ? 'Localisation...' : 'Utiliser ma position' }}
+            </button>
+
+            @if (erreurPositionDate()) {
+              <p class="erreur-position">{{ erreurPositionDate() }}</p>
+            }
+          } @else {
+            <label for="quartier-recherche">Quartier</label>
+            <p-select
+              inputId="quartier-recherche"
+              [options]="quartiers()"
+              optionLabel="nom"
+              optionValue="id"
+              placeholder="Tous les quartiers"
+              [showClear]="true"
+              [ngModel]="quartierSelectionne()"
+              (ngModelChange)="onQuartierChange($event)"
+            />
+
+            <button type="button" class="btn-position" (click)="utiliserMaPositionQuartier()" [disabled]="chargementPositionQuartier()">
+              <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                <circle cx="12" cy="10" r="3" stroke="currentColor" stroke-width="2"/>
+              </svg>
+              {{ chargementPositionQuartier() ? 'Localisation...' : 'Utiliser ma position' }}
+            </button>
+
+            @if (erreurPositionQuartier()) {
+              <p class="erreur-position">{{ erreurPositionQuartier() }}</p>
+            }
+          }
+        </div>
+      </aside>
     </div>
   </header>
 
@@ -90,52 +174,77 @@
             <h3>Aucune pharmacie de garde à cette date</h3>
             <p>Essayez une autre date, ou contactez le SAMU au 1515 en cas d'urgence médicale.</p>
           </div>
+        } @else if (resultatDate().liste.length === 0) {
+          <div class="etat-vide">
+            <h3>Aucune pharmacie de garde dans ce quartier aujourd'hui</h3>
+            <p>Réinitialisez le filtre quartier pour voir toutes les pharmacies de garde du jour.</p>
+          </div>
         } @else {
           <div class="resultats__entete">
-            <h2>{{ pharmacies().length }} pharmacie{{ pharmacies().length > 1 ? 's' : '' }} de garde</h2>
-            <span class="resultats__compteur">Mise à jour en direct</span>
+            <h2>{{ resultatDate().liste.length }} pharmacie{{ resultatDate().liste.length > 1 ? 's' : '' }} de garde</h2>
+            <span class="resultats__compteur">
+              @if (resultatDate().rayonDepasse) {
+                Aucune à moins de {{ rayonProximiteKm }} km — plus proches affichées
+              } @else if (positionCoordsDate()) {
+                Triées par proximité (&lt; {{ rayonProximiteKm }} km)
+              } @else if (quartierFiltreDate()) {
+                Filtré par quartier
+              } @else {
+                Mise à jour en direct
+              }
+            </span>
           </div>
-          <div class="liste-pharmacies">
-            @for (pharmacie of pharmacies(); track pharmacie.pharmacieId) {
-              <article class="carte-pharmacie">
-                <div class="carte-pharmacie__top">
-                  <div>
-                    <h3>{{ pharmacie.nom }}</h3>
-                    <p class="carte-pharmacie__adresse">
-                      {{ pharmacie.adresse }}
-                    </p>
-                    <p class="carte-pharmacie__zone">
-                      {{ pharmacie.nomQuartier }} · {{ pharmacie.nomZone }}
-                    </p>
-                  </div>
-                  <span class="statut">
-                    <span class="statut__point"></span>
-                    {{ libelleType(pharmacie.typeGarde) }}
-                  </span>
-                </div>
 
-                <div class="carte-pharmacie__bas">
-                  <span class="carte-pharmacie__horaires">
-                    {{ pharmacie.horaireOuverture }} — {{ pharmacie.horaireFermeture }}
-                  </span>
-                  <div class="carte-pharmacie__actions">
-                    <a [href]="lienAppel(pharmacie.telephone)" class="btn btn--primaire">
-                      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                        <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.68 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.9.32 1.85.55 2.81.68A2 2 0 0 1 22 16.92z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                      </svg>
-                      {{ pharmacie.telephone }}
-                    </a>
-                    <a [href]="lienItineraire(pharmacie)" target="_blank" rel="noopener" class="btn btn--secondaire">
-                      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                        <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                        <circle cx="12" cy="10" r="3" stroke="currentColor" stroke-width="2"/>
-                      </svg>
-                      Itinéraire
-                    </a>
+          <div class="resultats-layout">
+            <div class="liste-pharmacies">
+              @for (pharmacie of resultatDate().liste; track pharmacie.pharmacieId) {
+                <article class="carte-pharmacie">
+                  <div class="carte-pharmacie__top">
+                    <div>
+                      <h3>{{ pharmacie.nom }}</h3>
+                      <p class="carte-pharmacie__adresse">
+                        {{ pharmacie.adresse }}
+                      </p>
+                      <p class="carte-pharmacie__zone">
+                        {{ pharmacie.nomQuartier }} · {{ pharmacie.nomZone }}
+                        @if (pharmacie.distanceKm != null) {
+                          · <strong>{{ pharmacie.distanceKm | number: '1.1-1' }} km</strong>
+                        }
+                      </p>
+                    </div>
+                    <span class="statut">
+                      <span class="statut__point"></span>
+                      {{ libelleType(pharmacie.typeGarde) }}
+                    </span>
                   </div>
-                </div>
-              </article>
-            }
+
+                  <div class="carte-pharmacie__bas">
+                    <span class="carte-pharmacie__horaires">
+                      {{ pharmacie.horaireOuverture }} — {{ pharmacie.horaireFermeture }}
+                    </span>
+                    <div class="carte-pharmacie__actions">
+                      <a [href]="lienAppel(pharmacie.telephone)" class="btn btn--primaire">
+                        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                          <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.68 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.9.32 1.85.55 2.81.68A2 2 0 0 1 22 16.92z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                        {{ pharmacie.telephone }}
+                      </a>
+                      <a [href]="lienItineraire(pharmacie)" target="_blank" rel="noopener" class="btn btn--secondaire">
+                        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                          <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                          <circle cx="12" cy="10" r="3" stroke="currentColor" stroke-width="2"/>
+                        </svg>
+                        Itinéraire
+                      </a>
+                    </div>
+                  </div>
+                </article>
+              }
+            </div>
+
+            <div class="carte-panneau">
+              <app-carte-pharmacies [pharmacies]="resultatDate().liste" />
+            </div>
           </div>
         }
       } @else {
@@ -150,55 +259,71 @@
           </div>
         } @else {
           <div class="resultats__entete">
-            <h2>{{ pharmaciesPubliques().length }} pharmacie{{ pharmaciesPubliques().length > 1 ? 's' : '' }}</h2>
+            <h2>{{ pharmaciesPubliques().length }} pharmacie{{ pharmaciesPubliques().length > 1 ? 's' : '' }} active{{ pharmaciesPubliques().length > 1 ? 's' : '' }}</h2>
             <span class="resultats__compteur">
-              {{ positionActivee() ? 'Triées par proximité' : (quartierSelectionne() ? 'Filtré par quartier' : 'Toutes les pharmacies actives') }}
+              @if (rayonDepasseQuartier()) {
+                Aucune à moins de {{ rayonProximiteKm }} km — plus proches affichées
+              } @else if (positionActiveeQuartier()) {
+                Triées par proximité (&lt; {{ rayonProximiteKm }} km)
+              } @else if (quartierSelectionne()) {
+                Filtré par quartier
+              } @else {
+                Toutes les pharmacies actives
+              }
             </span>
           </div>
-          <div class="liste-pharmacies">
-            @for (pharmacie of pharmaciesPubliques(); track pharmacie.pharmacieId) {
-              <article class="carte-pharmacie">
-                <div class="carte-pharmacie__top">
-                  <div>
-                    <h3>{{ pharmacie.nom }}</h3>
-                    <p class="carte-pharmacie__adresse">
-                      {{ pharmacie.adresse }}
-                    </p>
-                    <p class="carte-pharmacie__zone">
-                      {{ pharmacie.nomQuartier }} · {{ pharmacie.nomZone }}
-                      @if (pharmacie.distanceKm != null) {
-                        · <strong>{{ pharmacie.distanceKm | number: '1.1-1' }} km</strong>
-                      }
-                    </p>
-                  </div>
-                </div>
 
-                <div class="carte-pharmacie__bas">
-                  <span class="carte-pharmacie__horaires">
-                    {{ pharmacie.horaireOuverture }} — {{ pharmacie.horaireFermeture }}
-                  </span>
-                  <div class="carte-pharmacie__actions">
-                    <a [href]="lienAppel(pharmacie.telephone)" class="btn btn--primaire">
-                      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                        <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.68 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.9.32 1.85.55 2.81.68A2 2 0 0 1 22 16.92z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                      </svg>
-                      {{ pharmacie.telephone }}
-                    </a>
-                    @if (pharmacie.latitude != null && pharmacie.longitude != null) {
-                      <a [href]="lienItinerairePublique(pharmacie)" target="_blank" rel="noopener" class="btn btn--secondaire">
-                        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                          <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                          <circle cx="12" cy="10" r="3" stroke="currentColor" stroke-width="2"/>
-                        </svg>
-                        Itinéraire
-                      </a>
-                    } @else {
-                      <span class="carte-pharmacie__sans-position">Position non renseignée</span>
-                    }
+          <div class="resultats-layout">
+            <div class="liste-pharmacies">
+              @for (pharmacie of pharmaciesPubliques(); track pharmacie.pharmacieId) {
+                <article class="carte-pharmacie">
+                  <div class="carte-pharmacie__top">
+                    <div>
+                      <h3>{{ pharmacie.nom }}</h3>
+                      <p class="carte-pharmacie__adresse">
+                        {{ pharmacie.adresse }}
+                      </p>
+                      <p class="carte-pharmacie__zone">
+                        {{ pharmacie.nomQuartier }} · {{ pharmacie.nomZone }}
+                        @if (pharmacie.distanceKm != null) {
+                          · <strong>{{ pharmacie.distanceKm | number: '1.1-1' }} km</strong>
+                        }
+                      </p>
+                    </div>
+                    <span class="statut statut--neutre">Horaires normaux</span>
                   </div>
-                </div>
-              </article>
-            }
+
+                  <div class="carte-pharmacie__bas">
+                    <span class="carte-pharmacie__horaires">
+                      {{ pharmacie.horaireOuverture }} — {{ pharmacie.horaireFermeture }}
+                    </span>
+                    <div class="carte-pharmacie__actions">
+                      <a [href]="lienAppel(pharmacie.telephone)" class="btn btn--primaire">
+                        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                          <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.68 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.9.32 1.85.55 2.81.68A2 2 0 0 1 22 16.92z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                        {{ pharmacie.telephone }}
+                      </a>
+                      @if (pharmacie.latitude != null && pharmacie.longitude != null) {
+                        <a [href]="lienItinerairePublique(pharmacie)" target="_blank" rel="noopener" class="btn btn--secondaire">
+                          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            <circle cx="12" cy="10" r="3" stroke="currentColor" stroke-width="2"/>
+                          </svg>
+                          Itinéraire
+                        </a>
+                      } @else {
+                        <span class="carte-pharmacie__sans-position">Position non renseignée</span>
+                      }
+                    </div>
+                  </div>
+                </article>
+              }
+            </div>
+
+            <div class="carte-panneau">
+              <app-carte-pharmacies [pharmacies]="pharmaciesPubliques()" />
+            </div>
           </div>
         }
       }

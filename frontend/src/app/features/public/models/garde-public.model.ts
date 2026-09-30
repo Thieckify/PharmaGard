@@ -16,4 +16,7 @@ export interface PharmacieDeGarde {
   typeGarde: TypeGarde;
   dateDebutGarde: string;
   dateFinGarde: string;
+  // Calculé côté client une fois la position du visiteur connue (absent tant que
+  // la géolocalisation n'a pas été utilisée)
+  distanceKm?: number;
 }
