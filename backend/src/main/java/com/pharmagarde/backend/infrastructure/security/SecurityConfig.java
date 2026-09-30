@@ -78,8 +78,10 @@ public class SecurityConfig {
                         // Endpoints publics métier (recherche de pharmacies de garde, etc.)
                         .requestMatchers("/api/public/**").permitAll()
 
-                        // Documentation Swagger (si ajoutée plus tard)
-                        .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
+                        // Documentation Swagger : /swagger-ui.html est l'adresse d'entrée (elle redirige
+                        // vers /swagger-ui/index.html), que le motif /swagger-ui/** ne couvre pas.
+                        // En production, springdoc est désactivé : ces routes n'existent alors plus.
+                        .requestMatchers("/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
 
                         // Validation d'une pharmacie : réservé au SUPERVISEUR uniquement (séparation
                         // des devoirs, cf. RG-11). Règle SPÉCIFIQUE déclarée AVANT la règle générale
