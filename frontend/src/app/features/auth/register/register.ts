@@ -10,6 +10,7 @@ import { AuthService } from '../../../core/services/auth.service';
 import { ReferentielService } from '../../../core/services/referentiel.service';
 import { Quartier } from '../../../core/models/referentiel.model';
 import { RegisterRequest } from '../../../core/models/auth.model';
+import { PageLayout } from '../../../shared/layout/page-layout/page-layout';
 import { PositionGps, SelecteurPosition } from '../../../shared/components/selecteur-position/selecteur-position';
 
 // Page d'inscription self-service d'un pharmacien : crée le compte ET la fiche pharmacie
@@ -22,7 +23,16 @@ import { PositionGps, SelecteurPosition } from '../../../shared/components/selec
 @Component({
   selector: 'app-register',
   standalone: true,
-  imports: [ReactiveFormsModule, RouterLink, InputTextModule, PasswordModule, Select, MessageModule, SelecteurPosition],
+  imports: [
+    ReactiveFormsModule,
+    RouterLink,
+    InputTextModule,
+    PasswordModule,
+    Select,
+    MessageModule,
+    SelecteurPosition,
+    PageLayout
+  ],
   templateUrl: './register.html',
   styleUrl: './register.scss'
 })
