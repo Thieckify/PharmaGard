@@ -20,17 +20,23 @@ export const routes: Routes = [
     path: 'auth/login',
     loadComponent: () => import('./features/auth/login/login').then(m => m.Login)
   },
+  // Inscription self-service d'un pharmacien (compte + fiche pharmacie) : accessible sans être authentifié
+  {
+    path: 'auth/register',
+    loadComponent: () => import('./features/auth/register/register').then(m => m.Register)
+  },
   // Tableau de bord temporaire de test (S2), accessible à tout utilisateur connecté
   {
     path: 'dashboard',
     loadComponent: () => import('./features/dashboard/dashboard').then(m => m.Dashboard),
     canActivate: [authGuard]
   },
-  // Liste des pharmacies : réservée aux PHARMACIEN et SUPERVISEUR (même restriction que côté backend)
+  // Liste des pharmacies : réservée au SUPERVISEUR, dont c'est l'outil de modération (agrément,
+  // validation, suppression, carte). Un pharmacien n'en a pas besoin : sa fiche est dans "Ma fiche".
   {
     path: 'pharmacies',
     loadComponent: () => import('./features/pharmacies/liste/liste').then(m => m.Liste),
-    canActivate: [authGuard, roleGuard(['PHARMACIEN', 'SUPERVISEUR'])]
+    canActivate: [authGuard, roleGuard(['SUPERVISEUR'])]
   },
   // Formulaire de création/mise à jour de sa fiche pharmacie : réservé au PHARMACIEN
   {

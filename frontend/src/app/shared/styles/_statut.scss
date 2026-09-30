@@ -1,0 +1,62 @@
+// Pastille de statut d'une fiche pharmacie, commune à toutes les pages qui l'affichent
+// (ma fiche, liste). Verte avec un halo qui pulse quand la fiche est validée, dorée et
+// fixe quand elle attend une validation : c'est ce qui doit attirer l'œil du superviseur.
+.statut {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  white-space: nowrap;
+  flex-shrink: 0;
+  background: rgba(16, 185, 129, 0.1);
+  color: var(--pg-success);
+
+  &__point {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--pg-success);
+    position: relative;
+
+    &::after {
+      content: '';
+      position: absolute;
+      inset: -4px;
+      border-radius: 50%;
+      background: var(--pg-success);
+      opacity: 0.35;
+      animation: pulse-statut 2s ease-out infinite;
+    }
+  }
+
+  &--attente {
+    background: color-mix(in srgb, var(--pg-accent-gold) 18%, transparent);
+    color: var(--pg-surface-700);
+
+    .statut__point {
+      background: var(--pg-accent-gold);
+
+      &::after {
+        display: none;
+      }
+    }
+  }
+}
+
+@keyframes pulse-statut {
+  0% {
+    transform: scale(0.6);
+    opacity: 0.4;
+  }
+  70% {
+    transform: scale(1.4);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1.4);
+    opacity: 0;
+  }
+}

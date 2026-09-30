@@ -1,5 +1,6 @@
 package com.pharmagarde.backend.infrastructure.security;
 
+import com.pharmagarde.backend.infrastructure.ai.RateLimitFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -28,13 +29,16 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class SecurityConfig {
 
     private final JwtAuthFilter jwtAuthFilter;
+    private final RateLimitFilter rateLimitFilter;
     private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
     private final JwtAccessDeniedHandler jwtAccessDeniedHandler;
 
     public SecurityConfig(JwtAuthFilter jwtAuthFilter,
+                           RateLimitFilter rateLimitFilter,
                            JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint,
                            JwtAccessDeniedHandler jwtAccessDeniedHandler) {
         this.jwtAuthFilter = jwtAuthFilter;
+        this.rateLimitFilter = rateLimitFilter;
         this.jwtAuthenticationEntryPoint = jwtAuthenticationEntryPoint;
         this.jwtAccessDeniedHandler = jwtAccessDeniedHandler;
     }
@@ -78,14 +82,25 @@ public class SecurityConfig {
                         // Endpoints publics métier (recherche de pharmacies de garde, etc.)
                         .requestMatchers("/api/public/**").permitAll()
 
-                        // Documentation Swagger (si ajoutée plus tard)
-                        .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
+                        // Assistant conversationnel : public, aucune authentification requise
+                        // (limité en fréquence par RateLimitFilter, cf. plus bas)
+                        .requestMatchers("/api/assistant").permitAll()
+
+                        // Documentation Swagger : /swagger-ui.html est l'adresse d'entrée (elle redirige
+                        // vers /swagger-ui/index.html), que le motif /swagger-ui/** ne couvre pas.
+                        // En production, springdoc est désactivé : ces routes n'existent alors plus.
+                        .requestMatchers("/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
 
                         // Validation d'une pharmacie : réservé au SUPERVISEUR uniquement (séparation
                         // des devoirs, cf. RG-11). Règle SPÉCIFIQUE déclarée AVANT la règle générale
                         // /api/pharmacies/** ci-dessous : Spring Security retient la première règle
                         // qui correspond à l'URL, donc l'ordre ici n'est pas cosmétique.
                         .requestMatchers(HttpMethod.PATCH, "/api/pharmacies/*/validation").hasRole("SUPERVISEUR")
+
+                        // Suppression d'une pharmacie (RG-15) : réservée au SUPERVISEUR. Même remarque
+                        // sur l'ordre : sans cette règle placée avant la règle générale, un PHARMACIEN
+                        // pourrait supprimer une pharmacie, puisque la règle générale l'autorise.
+                        .requestMatchers(HttpMethod.DELETE, "/api/pharmacies/*").hasRole("SUPERVISEUR")
 
                         // Gestion des fiches pharmacie : réservé aux pharmaciens (upsert de leur fiche)
                         // et superviseurs (consultation), pas à un ADMIN qui n'a pas ce rôle métier
@@ -95,7 +110,7 @@ public class SecurityConfig {
                         // un SUPERVISEUR n'a pas à déclarer le planning à la place du pharmacien
                         .requestMatchers(HttpMethod.POST, "/api/gardes").hasRole("PHARMACIEN")
 
-                         // Consultation de son propre planning : même règle de rôle que la déclaration
+                        // Consultation de son propre planning : même règle de rôle que la déclaration
                         .requestMatchers(HttpMethod.GET, "/api/gardes").hasRole("PHARMACIEN")
 
                         // Modification/suppression d'une période de garde : même règle de rôle ;
@@ -114,6 +129,10 @@ public class SecurityConfig {
                 .exceptionHandling(exception -> exception
                         .authenticationEntryPoint(jwtAuthenticationEntryPoint)
                         .accessDeniedHandler(jwtAccessDeniedHandler))
+
+                // La limite de fréquence de l'assistant se vérifie avant même l'authentification :
+                // elle doit bloquer un excès d'appels quel que soit le résultat de l'auth ensuite.
+                .addFilterBefore(rateLimitFilter, UsernamePasswordAuthenticationFilter.class)
 
                 // Insertion de notre filtre JWT avant le filtre standard de Spring Security,
                 // pour que l'authentification soit posée dans le contexte AVANT

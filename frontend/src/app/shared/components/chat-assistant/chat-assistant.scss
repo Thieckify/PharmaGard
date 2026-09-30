@@ -1,0 +1,339 @@
+// Position fixe en bas à droite de l'écran, au-dessus de tout, y compris la carte Leaflet
+// (dont le liseré ::before de .carte-panneau monte à z-index: 1000) et le badge de licence
+// PrimeUI (bas droit lui aussi) : décalé plus haut pour ne jamais le chevaucher.
+.assistant-widget {
+  position: fixed;
+  right: var(--pg-space-lg);
+  bottom: calc(var(--pg-space-lg) + 56px);
+  z-index: 2000;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.assistant-bulle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 58px;
+  height: 58px;
+  border-radius: 50%;
+  border: 2px solid var(--pg-accent-gold);
+  background: linear-gradient(135deg, var(--pg-primary-600), var(--pg-primary-800));
+  color: var(--pg-accent-gold);
+  box-shadow: var(--pg-shadow-lg), 0 0 0 3px rgba(255, 255, 255, 0.9);
+  cursor: pointer;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+
+  svg {
+    width: 26px;
+    height: 26px;
+  }
+
+  &:hover {
+    transform: scale(1.05);
+    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.22), 0 0 0 3px rgba(255, 255, 255, 0.9);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--pg-accent-gold);
+    outline-offset: 3px;
+  }
+}
+
+.assistant-panel {
+  display: flex;
+  flex-direction: column;
+  width: 360px;
+  max-width: calc(100vw - 2 * var(--pg-space-lg));
+  height: 520px;
+  max-height: calc(100vh - 140px);
+  margin-bottom: var(--pg-space-md);
+  background: var(--pg-surface-0);
+  border-radius: var(--pg-radius-lg);
+  box-shadow: var(--pg-shadow-lg);
+  overflow: hidden;
+  position: relative;
+
+  // Même liseré signature que le reste du site
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--pg-primary-500), var(--pg-accent-gold));
+    z-index: 1;
+  }
+}
+
+.assistant-panel__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--pg-space-sm);
+  padding: var(--pg-space-md) var(--pg-space-lg);
+  background: linear-gradient(135deg, var(--pg-primary-700) 0%, var(--pg-primary-900) 100%);
+  color: white;
+}
+
+.assistant-panel__titre {
+  display: flex;
+  align-items: center;
+  gap: var(--pg-space-sm);
+  min-width: 0;
+}
+
+.assistant-panel__logo {
+  width: 30px;
+  height: 30px;
+  flex-shrink: 0;
+  border-radius: var(--pg-radius-md);
+  background: white;
+  color: var(--pg-primary-700);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  svg {
+    width: 18px;
+    height: 18px;
+  }
+}
+
+.assistant-panel__nom {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.assistant-panel__statut {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.6875rem;
+  color: rgba(255, 255, 255, 0.65);
+}
+
+// Même principe de pastille pulsante que le badge "Garde" de la page publique
+.assistant-panel__point {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--pg-success);
+  position: relative;
+
+  &::after {
+    content: '';
+    position: absolute;
+    inset: -3px;
+    border-radius: 50%;
+    background: var(--pg-success);
+    opacity: 0.4;
+    animation: assistant-pulse 2s ease-out infinite;
+  }
+}
+
+@keyframes assistant-pulse {
+  0% {
+    transform: scale(0.6);
+    opacity: 0.4;
+  }
+  70% {
+    transform: scale(1.5);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1.5);
+    opacity: 0;
+  }
+}
+
+.assistant-panel__fermer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  flex-shrink: 0;
+  border: none;
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+  border-radius: var(--pg-radius-md);
+  cursor: pointer;
+  transition: background 0.2s ease;
+
+  svg {
+    width: 14px;
+    height: 14px;
+  }
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.2);
+  }
+}
+
+.assistant-panel__messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--pg-space-md);
+  display: flex;
+  flex-direction: column;
+  gap: var(--pg-space-sm);
+  background: var(--pg-surface-50);
+}
+
+.message {
+  max-width: 85%;
+  padding: 9px 13px;
+  border-radius: var(--pg-radius-md);
+  font-size: 0.875rem;
+  line-height: 1.5;
+  background: var(--pg-surface-0);
+  border: 1px solid var(--pg-surface-200);
+  color: var(--pg-surface-900);
+  align-self: flex-start;
+  white-space: pre-wrap;
+  word-break: break-word;
+
+  &--utilisateur {
+    align-self: flex-end;
+    background: var(--pg-primary-600);
+    border-color: var(--pg-primary-600);
+    color: white;
+  }
+
+  &--erreur {
+    background: color-mix(in srgb, var(--pg-error) 8%, white);
+    border-color: color-mix(in srgb, var(--pg-error) 30%, white);
+    color: var(--pg-surface-700);
+  }
+
+  &--reflexion {
+    display: flex;
+    gap: 4px;
+    align-items: center;
+    padding: 12px 14px;
+
+    span {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--pg-surface-500);
+      animation: assistant-reflexion 1.2s ease-in-out infinite;
+
+      &:nth-child(2) {
+        animation-delay: 0.15s;
+      }
+
+      &:nth-child(3) {
+        animation-delay: 0.3s;
+      }
+    }
+  }
+}
+
+@keyframes assistant-reflexion {
+  0%,
+  60%,
+  100% {
+    transform: translateY(0);
+    opacity: 0.4;
+  }
+  30% {
+    transform: translateY(-4px);
+    opacity: 1;
+  }
+}
+
+.assistant-panel__avis {
+  margin: 0;
+  padding: 6px var(--pg-space-md);
+  font-size: 0.6875rem;
+  color: var(--pg-surface-500);
+  text-align: center;
+  border-top: 1px solid var(--pg-surface-100);
+  background: var(--pg-surface-0);
+
+  a {
+    color: var(--pg-primary-700);
+    font-weight: 600;
+    text-decoration: none;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+}
+
+.assistant-panel__saisie {
+  display: flex;
+  gap: var(--pg-space-xs);
+  padding: var(--pg-space-sm);
+  background: var(--pg-surface-0);
+  border-top: 1px solid var(--pg-surface-100);
+
+  input {
+    flex: 1;
+    min-width: 0;
+    padding: 9px 12px;
+    border: 1px solid var(--pg-surface-300);
+    border-radius: var(--pg-radius-md);
+    font: inherit;
+    font-size: 0.875rem;
+
+    &:focus {
+      outline: none;
+      border-color: var(--pg-primary-500);
+      box-shadow: 0 0 0 3px var(--pg-primary-100);
+    }
+
+    &:disabled {
+      background: var(--pg-surface-50);
+    }
+  }
+
+  button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 38px;
+    flex-shrink: 0;
+    border: none;
+    border-radius: var(--pg-radius-md);
+    background: var(--pg-primary-600);
+    color: white;
+    cursor: pointer;
+    transition: background 0.2s ease;
+
+    svg {
+      width: 16px;
+      height: 16px;
+    }
+
+    &:hover:not(:disabled) {
+      background: var(--pg-primary-700);
+    }
+
+    &:disabled {
+      opacity: 0.5;
+      cursor: default;
+    }
+  }
+}
+
+@media (max-width: 480px) {
+  .assistant-widget {
+    right: var(--pg-space-md);
+    bottom: var(--pg-space-md);
+  }
+
+  .assistant-panel {
+    width: calc(100vw - 2 * var(--pg-space-md));
+    height: calc(100vh - 160px);
+  }
+}

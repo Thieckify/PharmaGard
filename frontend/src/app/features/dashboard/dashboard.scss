@@ -1,48 +1,19 @@
-.page-wrapper {
-  min-height: 100vh;
-  background: linear-gradient(180deg, var(--pg-primary-50) 0%, var(--pg-surface-50) 400px);
+@use '../../shared/styles/statut';
+@use '../../shared/styles/actions';
+
+// Les boutons de navigation sont des liens : on retire le soulignement du navigateur
+a.btn {
+  text-decoration: none;
 }
 
-.page {
-  max-width: 600px;
-  margin: 0 auto;
-  padding: var(--pg-space-2xl) var(--pg-space-xl);
-}
-
-.page-header__eyebrow {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 0.8125rem;
-  font-weight: 600;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  color: var(--pg-primary-600);
-  margin-bottom: var(--pg-space-xs);
-}
-
-.accent-dot {
-  color: var(--pg-accent-gold);
-  font-size: 0.625rem;
-}
-
-.dashboard-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-end;
-  margin-bottom: var(--pg-space-xl);
-
-  h1 {
-    font-size: 1.75rem;
-    margin: 0;
-  }
-}
-
-.user-card {
+// Carte du tableau de bord : même famille que les cartes de la page de modération.
+// La première remonte sur le bandeau sombre du layout.
+.carte {
   background: var(--pg-surface-0);
-  padding: var(--pg-space-xl);
+  border: 1px solid var(--pg-surface-200);
   border-radius: var(--pg-radius-lg);
-  box-shadow: var(--pg-shadow-md);
+  box-shadow: var(--pg-shadow-lg);
+  padding: var(--pg-space-xl);
   position: relative;
   overflow: hidden;
 
@@ -56,23 +27,307 @@
     background: linear-gradient(90deg, var(--pg-primary-500), var(--pg-accent-gold));
   }
 
-  h2 {
-    margin-bottom: var(--pg-space-md);
-    color: var(--pg-primary-700);
+  & + & {
+    margin-top: var(--pg-space-lg);
   }
 
-  ul {
-    list-style: none;
-    padding: 0;
-    margin: 0;
+  &__entete {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--pg-space-md);
+    margin-bottom: var(--pg-space-md);
 
-    li {
-      padding: var(--pg-space-xs) 0;
-      border-bottom: 1px solid var(--pg-surface-200);
+    h2 {
+      font-size: 1.125rem;
+      letter-spacing: -0.02em;
+      margin: 0;
+    }
+  }
 
-      &:last-child {
-        border-bottom: none;
-      }
+  &__nom {
+    font-size: 1.25rem;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    margin: 0 0 6px;
+  }
+
+  &__periode {
+    font-size: 1.25rem;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    margin: 0 0 6px;
+    font-variant-numeric: tabular-nums;
+  }
+
+  &__detail {
+    color: var(--pg-surface-700);
+    font-size: 0.9375rem;
+    margin: 0 0 2px;
+
+    &--discret {
+      color: var(--pg-surface-500);
+      font-size: 0.8125rem;
+    }
+  }
+
+  &__resume {
+    margin: var(--pg-space-md) 0 0;
+    font-size: 0.9375rem;
+    color: var(--pg-surface-700);
+  }
+}
+
+// Étiquette "En cours" / "À venir" de la carte de garde
+.etiquette {
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  white-space: nowrap;
+  background: var(--pg-surface-100);
+  color: var(--pg-surface-500);
+
+  &--en-cours {
+    background: rgba(16, 185, 129, 0.1);
+    color: var(--pg-success);
+  }
+}
+
+// Information à ne pas manquer : bordure dorée sur le côté
+.avis {
+  margin: var(--pg-space-md) 0 0;
+  padding: var(--pg-space-sm) var(--pg-space-md);
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  color: var(--pg-surface-700);
+  background: var(--pg-surface-50);
+  border: 1px solid var(--pg-surface-200);
+  border-left: 3px solid var(--pg-accent-gold);
+  border-radius: var(--pg-radius-md);
+}
+
+.etat {
+  margin: 0;
+  text-align: center;
+  color: var(--pg-surface-500);
+
+  &--erreur {
+    color: var(--pg-error);
+  }
+}
+
+// Infos du compte
+.infos {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+
+  li {
+    display: flex;
+    justify-content: space-between;
+    gap: var(--pg-space-md);
+    padding: var(--pg-space-sm) 0;
+    border-bottom: 1px solid var(--pg-surface-100);
+    font-size: 0.9375rem;
+
+    &:last-child {
+      border-bottom: none;
+    }
+
+    span {
+      color: var(--pg-surface-500);
+    }
+  }
+}
+
+// Compteurs : un trait de couleur en haut de chaque tuile donne son sens
+.tuiles {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--pg-space-md);
+
+  // Trois compteurs (chiffres de garde du pharmacien) au lieu de quatre
+  &--trois {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+.tuile {
+  padding: var(--pg-space-md);
+  background: var(--pg-surface-50);
+  border: 1px solid var(--pg-surface-200);
+  border-top: 3px solid var(--pg-surface-300);
+  border-radius: var(--pg-radius-md);
+
+  &__valeur {
+    display: block;
+    font-size: 1.75rem;
+    font-weight: 600;
+    letter-spacing: -0.03em;
+    line-height: 1.1;
+    font-variant-numeric: tabular-nums;
+    color: var(--pg-surface-900);
+  }
+
+  &__label {
+    display: block;
+    margin-top: 4px;
+    font-size: 0.8125rem;
+    color: var(--pg-surface-500);
+  }
+
+  &--attente {
+    border-top-color: var(--pg-accent-gold);
+  }
+
+  &--validee {
+    border-top-color: var(--pg-success);
+  }
+
+  &--semaine {
+    border-top-color: var(--pg-primary-500);
+  }
+
+  // Chiffres de garde du pharmacien : la couleur principale, ici aucun statut à signaler
+  &--garde {
+    border-top-color: var(--pg-primary-500);
+  }
+}
+
+// Nombre de fiches à traiter, dans le bouton de modération
+.pastille {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: white;
+  color: var(--pg-primary-700);
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+// Tableau "gardes d'aujourd'hui, par zone"
+.zones {
+  margin-top: var(--pg-space-md);
+}
+
+.zones__entete,
+.zone {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(0, 2fr) minmax(110px, auto);
+  gap: var(--pg-space-md);
+  align-items: center;
+  padding: var(--pg-space-sm) 0;
+}
+
+.zones__entete {
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--pg-surface-500);
+  border-bottom: 1px solid var(--pg-surface-200);
+
+  &-droite {
+    justify-self: end;
+  }
+}
+
+.zone {
+  border-bottom: 1px solid var(--pg-surface-100);
+
+  &:last-child {
+    border-bottom: none;
+  }
+
+  &__nom {
+    font-weight: 500;
+    color: var(--pg-surface-900);
+  }
+
+  &__detail {
+    display: block;
+    margin-top: 4px;
+    font-size: 0.75rem;
+    color: var(--pg-surface-500);
+  }
+}
+
+// Barre du nombre de fiches par zone : vert = validées, doré = en attente
+.barre {
+  display: flex;
+  height: 8px;
+  border-radius: 999px;
+  background: var(--pg-surface-100);
+  overflow: hidden;
+
+  &__validees {
+    background: var(--pg-success);
+  }
+
+  &__attente {
+    background: var(--pg-accent-gold);
+  }
+}
+
+// Pastille de couverture de garde de la zone
+.couverture {
+  justify-self: end;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  white-space: nowrap;
+
+  &--ok {
+    background: rgba(16, 185, 129, 0.1);
+    color: var(--pg-success);
+  }
+
+  &--alerte {
+    background: color-mix(in srgb, var(--pg-error) 10%, white);
+    color: var(--pg-error);
+  }
+
+  &--vide {
+    background: var(--pg-surface-100);
+    color: var(--pg-surface-500);
+  }
+}
+
+@media (max-width: 760px) {
+  .carte {
+    padding: var(--pg-space-lg);
+
+    &__entete {
+      flex-wrap: wrap;
+    }
+  }
+
+  .tuiles {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+
+    // Trois compteurs : l'un sous l'autre, pour que leurs étiquettes restent lisibles
+    &--trois {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  // Sur mobile : le nom et la pastille sur une ligne, les barres en dessous
+  .zones__entete {
+    display: none;
+  }
+
+  .zone {
+    grid-template-columns: minmax(0, 1fr) auto;
+
+    &__pharmacies {
+      grid-column: 1 / -1;
+      order: 3;
     }
   }
 }

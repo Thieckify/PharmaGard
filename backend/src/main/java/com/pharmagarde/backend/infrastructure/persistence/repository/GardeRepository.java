@@ -18,4 +18,9 @@ public interface GardeRepository extends JpaRepository<GardeEntity, Long> {
     // Périodes actives à une date précise (date1 == date2 == la date recherchée) —
     // ne sert pas encore, prévu pour l'endpoint public GET /api/public/gardes?date=...
     List<GardeEntity> findByDateDebutLessThanEqualAndDateFinGreaterThanEqual(LocalDate date1, LocalDate date2);
+
+    // Supprime toutes les périodes d'une pharmacie — utilisé quand un superviseur supprime
+    // la fiche (RG-15) : le planning dépend de la fiche et doit partir avant elle.
+    // À appeler à l'intérieur d'une transaction.
+    void deleteByPharmacieId(Long pharmacieId);
 }

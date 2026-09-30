@@ -1,97 +1,59 @@
-.page-wrapper {
-  min-height: 100vh;
-  background: linear-gradient(180deg, var(--pg-primary-50) 0%, var(--pg-surface-50) 400px);
+@use '../../../shared/styles/formulaire';
+@use '../../../shared/styles/statut';
+@use '../../../shared/styles/actions';
+
+.carte-formulaire__titre {
+  font-size: 1.125rem;
+  letter-spacing: -0.02em;
+  margin: 0;
 }
 
-.page {
-  max-width: 760px;
-  margin: 0 auto;
-  padding: var(--pg-space-2xl) var(--pg-space-xl);
-}
-
-.page-header {
-  margin-bottom: var(--pg-space-xl);
-
-  &__eyebrow {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    font-size: 0.8125rem;
-    font-weight: 600;
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
-    color: var(--pg-primary-600);
-    margin-bottom: var(--pg-space-xs);
-  }
-
-  h1 {
-    font-size: 2rem;
-    margin-bottom: var(--pg-space-xs);
-  }
-
-  &__subtitle {
-    color: var(--pg-surface-500);
-    margin: 0;
+// Trois champs sur une ligne (début, fin, type) ; sur mobile, le style commun les empile
+@media (min-width: 761px) {
+  .champ-groupe--trois {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }
 
-.accent-dot {
-  color: var(--pg-accent-gold);
-  font-size: 0.625rem;
-}
+.periodes {
+  margin-top: var(--pg-space-xl);
 
-.formulaire-garde {
-  background: var(--pg-surface-0);
-  border: 1px solid var(--pg-surface-200);
-  border-radius: var(--pg-radius-lg);
-  box-shadow: var(--pg-shadow-sm);
-  padding: var(--pg-space-lg);
-  margin-bottom: var(--pg-space-xl);
-
-  h2 {
-    font-size: 1.0625rem;
-    margin-bottom: var(--pg-space-md);
-  }
-
-  &__champs {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: var(--pg-space-md);
-    margin-bottom: var(--pg-space-md);
-  }
-
-  &__actions {
-    display: flex;
-    gap: var(--pg-space-sm);
+  &__titre {
+    font-size: 1.125rem;
+    letter-spacing: -0.02em;
+    margin: 0 0 var(--pg-space-md);
   }
 }
 
-.champ {
-  display: flex;
-  flex-direction: column;
-  gap: var(--pg-space-xs);
-
-  label {
-    font-size: 0.8125rem;
-    font-weight: 500;
-    color: var(--pg-surface-700);
-  }
-}
-
-.liste-pharmacies {
+.liste-gardes {
   display: grid;
   gap: var(--pg-space-md);
+  margin-top: var(--pg-space-md);
 }
 
-.carte-pharmacie {
+// Chargement, erreur ou liste vide
+.etat {
+  margin: var(--pg-space-md) 0 0;
+  padding: var(--pg-space-xl);
+  text-align: center;
+  color: var(--pg-surface-500);
+  background: var(--pg-surface-0);
+  border: 1px dashed var(--pg-surface-300);
+  border-radius: var(--pg-radius-lg);
+
+  &--erreur {
+    color: var(--pg-error);
+  }
+}
+
+.carte-garde {
   background: var(--pg-surface-0);
   border: 1px solid var(--pg-surface-200);
   border-radius: var(--pg-radius-lg);
   box-shadow: var(--pg-shadow-sm);
-  padding: var(--pg-space-lg);
+  padding: var(--pg-space-xl);
   position: relative;
   overflow: hidden;
-  transition: box-shadow 0.2s ease, transform 0.2s ease;
 
   &::before {
     content: '';
@@ -103,124 +65,34 @@
     background: linear-gradient(90deg, var(--pg-primary-500), var(--pg-accent-gold));
   }
 
-  &:hover {
-    box-shadow: var(--pg-shadow-md);
-    transform: translateY(-1px);
-  }
-
   &__top {
     display: flex;
     align-items: flex-start;
     justify-content: space-between;
-    gap: var(--pg-space-md);
-    margin-bottom: var(--pg-space-xs);
+    gap: var(--pg-space-lg);
 
     h3 {
       font-size: 1.125rem;
+      letter-spacing: -0.02em;
+      margin-bottom: 4px;
+      font-variant-numeric: tabular-nums;
     }
   }
 
-  &__adresse {
+  &__pharmacie {
     color: var(--pg-surface-500);
-    font-size: 0.9375rem;
-    margin: 0 0 var(--pg-space-sm);
-  }
-
-  &__actions {
-    display: flex;
-    gap: var(--pg-space-sm);
-    border-top: 1px solid var(--pg-surface-100);
-    padding-top: var(--pg-space-sm);
+    font-size: 0.875rem;
+    margin: 0;
   }
 }
 
-.btn {
-  display: inline-flex;
-  align-items: center;
-  padding: 8px 16px;
-  border-radius: var(--pg-radius-md);
-  font-size: 0.875rem;
-  font-weight: 500;
-  border: none;
-  cursor: pointer;
-  transition: background 0.2s ease, border-color 0.2s ease, opacity 0.2s ease;
+@media (max-width: 760px) {
+  .carte-garde {
+    padding: var(--pg-space-lg);
 
-  &:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-  }
-
-  &--primaire {
-    background: var(--pg-primary-600);
-    color: white;
-
-    &:hover:not(:disabled) {
-      background: var(--pg-primary-700);
+    &__top {
+      flex-direction: column;
+      gap: var(--pg-space-sm);
     }
-  }
-
-  &--secondaire {
-    background: var(--pg-surface-0);
-    color: var(--pg-surface-700);
-    border: 1px solid var(--pg-surface-300);
-
-    &:hover:not(:disabled) {
-      border-color: var(--pg-primary-600);
-      color: var(--pg-primary-600);
-    }
-  }
-
-  &--danger {
-    background: var(--pg-surface-0);
-    color: var(--pg-error);
-    border: 1px solid var(--pg-surface-300);
-
-    &:hover:not(:disabled) {
-      border-color: var(--pg-error);
-      background: rgba(239, 68, 68, 0.06);
-    }
-  }
-}
-
-.statut {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 4px 10px;
-  border-radius: 999px;
-  font-size: 0.75rem;
-  font-weight: 600;
-  white-space: nowrap;
-  background: rgba(16, 185, 129, 0.1);
-  color: var(--pg-success);
-
-  &__point {
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    background: var(--pg-success);
-  }
-}
-
-.etat-info,
-.etat-erreur {
-  color: var(--pg-surface-500);
-}
-
-.etat-erreur {
-  color: var(--pg-error);
-}
-
-.etat-vide {
-  text-align: center;
-  padding: var(--pg-space-2xl) 0;
-  color: var(--pg-surface-500);
-  border: 1px dashed var(--pg-surface-300);
-  border-radius: var(--pg-radius-lg);
-}
-
-@media (max-width: 600px) {
-  .formulaire-garde__champs {
-    grid-template-columns: 1fr;
   }
 }

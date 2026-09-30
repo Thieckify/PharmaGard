@@ -1,0 +1,75 @@
+@use '../../../shared/styles/formulaire';
+
+// Cette page découpe son formulaire en deux blocs numérotés : plus d'espace entre eux
+.carte-formulaire {
+  gap: var(--pg-space-xl);
+}
+
+.bloc {
+  display: flex;
+  flex-direction: column;
+  gap: var(--pg-space-md);
+
+  & + & {
+    padding-top: var(--pg-space-xl);
+    border-top: 1px solid var(--pg-surface-100);
+  }
+
+  &__entete {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--pg-space-sm);
+
+    h2 {
+      font-size: 1.125rem;
+      letter-spacing: -0.02em;
+      margin-bottom: 2px;
+    }
+
+    p {
+      color: var(--pg-surface-500);
+      font-size: 0.875rem;
+      margin: 0;
+    }
+  }
+}
+
+.etape-numero {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  flex-shrink: 0;
+  border-radius: var(--pg-radius-md);
+  background: var(--pg-surface-0);
+  border: 1px solid var(--pg-surface-200);
+  color: var(--pg-primary-700);
+  font-weight: 600;
+  font-size: 0.9375rem;
+}
+
+.note {
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  color: var(--pg-surface-500);
+  text-align: center;
+  margin: calc(var(--pg-space-md) * -1) 0 0;
+}
+
+.form-footer {
+  text-align: center;
+  font-size: 0.875rem;
+  color: var(--pg-surface-500);
+  margin: 0;
+
+  .form-link {
+    color: var(--pg-primary-600);
+    text-decoration: none;
+    font-weight: 500;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+}

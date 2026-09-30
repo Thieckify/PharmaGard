@@ -2,6 +2,11 @@ package com.pharmagarde.backend.domain.model;
 
 import com.pharmagarde.backend.domain.enums.Role;
 
+/**
+ * Modèle métier d'un utilisateur de la plateforme (admin, superviseur ou pharmacien).
+ * POJO pur : aucune dépendance à Spring ni à JPA. La conversion depuis/vers la base
+ * de données est assurée par UserMapper.
+ */
 public class User {
 
     private Long id;
@@ -29,6 +34,12 @@ public class User {
         this.tenantId = tenantId;
         this.zoneId = zoneId;
         this.active = active;
+    }
+
+    // Règle métier : un PHARMACIEN est son propre tenant (son tenantId est son propre id).
+    // À appeler une fois que l'id existe, c'est-à-dire après le premier enregistrement.
+    public void devenirSonPropreTenant() {
+        this.tenantId = this.id;
     }
 
     // Getters et setters

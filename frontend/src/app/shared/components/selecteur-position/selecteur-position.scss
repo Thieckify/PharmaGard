@@ -1,0 +1,86 @@
+:host {
+  display: block;
+}
+
+.selecteur {
+  display: flex;
+  flex-direction: column;
+  gap: var(--pg-space-xs);
+}
+
+.selecteur__entete {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--pg-space-sm);
+  flex-wrap: wrap;
+}
+
+// Même style que les labels des formulaires (petites majuscules grises)
+.selecteur__label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--pg-surface-500);
+}
+
+// isolation: isolate enferme les calques de Leaflet (dont les z-index montent jusqu'à
+// 1000) dans une "pochette" : sans elle, ils passeraient par-dessus les listes
+// déroulantes PrimeNG qui s'ouvrent juste au-dessus de la carte.
+.selecteur__carte {
+  height: 280px;
+  border-radius: var(--pg-radius-md);
+  border: 1px solid var(--pg-surface-300);
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.selecteur__aide,
+.selecteur__erreur {
+  font-size: 0.75rem;
+  margin: 0;
+}
+
+.selecteur__aide {
+  color: var(--pg-surface-500);
+}
+
+.selecteur__erreur {
+  color: var(--pg-error);
+}
+
+// Même bouton que "Utiliser ma position" de la page d'accueil (icône dorée)
+.btn-position {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 12px;
+  border: 1px solid var(--pg-surface-200);
+  background: var(--pg-surface-0);
+  border-radius: var(--pg-radius-md);
+  font: inherit;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--pg-primary-700);
+  cursor: pointer;
+  transition:
+    border-color 0.2s ease,
+    background 0.2s ease;
+
+  svg {
+    width: 14px;
+    height: 14px;
+    color: var(--pg-accent-gold);
+  }
+
+  &:hover:not(:disabled) {
+    border-color: var(--pg-primary-500);
+    background: var(--pg-primary-50);
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: default;
+  }
+}

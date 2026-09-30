@@ -1,0 +1,24 @@
+<div class="selecteur">
+  <div class="selecteur__entete">
+    <span class="selecteur__label">Position sur la carte</span>
+    <button type="button" class="btn-position" (click)="utiliserMaPosition()" [disabled]="chargementPosition()">
+      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        <circle cx="12" cy="10" r="3" stroke="currentColor" stroke-width="2"/>
+      </svg>
+      {{ chargementPosition() ? 'Localisation...' : 'Utiliser ma position' }}
+    </button>
+  </div>
+
+  <div #conteneur class="selecteur__carte"></div>
+
+  @if (erreurPosition()) {
+    <p class="selecteur__erreur">{{ erreurPosition() }}</p>
+  } @else if (latitude() != null && longitude() != null) {
+    <p class="selecteur__aide">
+      Position enregistrée ({{ latitude() }}, {{ longitude() }}). Faites glisser le repère pour l'ajuster.
+    </p>
+  } @else {
+    <p class="selecteur__aide">Cliquez sur la carte pour placer votre pharmacie, ou utilisez votre position actuelle.</p>
+  }
+</div>

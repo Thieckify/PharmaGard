@@ -2,7 +2,8 @@ package com.pharmagarde.backend.application.dto;
 
 import java.time.LocalDateTime;
 
-// Représentation d'une pharmacie renvoyée au frontend
+// Représentation d'une pharmacie renvoyée au frontend (routes authentifiées uniquement).
+// numeroAgrementOrdre permet au superviseur de contrôler la fiche au moment de la valider.
 public record PharmacieResponse(
         Long id,
         String nom,
@@ -19,5 +20,6 @@ public record PharmacieResponse(
         boolean active,
         Long tenantUserId,
         Long valideParUserId,
-        LocalDateTime valideLe) {
+        LocalDateTime valideLe,
+        String numeroAgrementOrdre) {
 }

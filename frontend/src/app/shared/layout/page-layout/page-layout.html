@@ -1,0 +1,61 @@
+<div class="layout">
+
+  <nav class="nav">
+    <div class="nav__inner">
+      <a routerLink="/" class="nav__logo">
+        <span class="logo-mark">
+          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <path d="M9 3h6a1 1 0 0 1 1 1v4h4a1 1 0 0 1 1 1v6a1 1 0 0 1-1 1h-4v4a1 1 0 0 1-1 1H9a1 1 0 0 1-1-1v-4H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1h4V4a1 1 0 0 1 1-1z" fill="currentColor" />
+          </svg>
+        </span>
+        <span class="logo-text">PharmaGarde<span class="logo-dot">.</span></span>
+      </a>
+
+      @if (utilisateur()) {
+        <div class="nav__liens">
+          @for (lien of liens(); track lien.chemin) {
+            <a [routerLink]="lien.chemin" routerLinkActive="nav__lien--actif"
+              [routerLinkActiveOptions]="{ exact: true }" class="nav__lien">{{ lien.libelle }}</a>
+          }
+        </div>
+        <button type="button" class="nav__bouton" (click)="deconnecter()">Se déconnecter</button>
+      } @else {
+        <a routerLink="/auth/login" class="nav__bouton">Se connecter</a>
+      }
+    </div>
+  </nav>
+
+  <header class="hero">
+    <div class="hero__inner">
+      @if (eyebrow()) {
+        <div class="hero__eyebrow">
+          <span class="accent-dot">●</span>
+          {{ eyebrow() }}
+        </div>
+      }
+      <h1>
+        {{ titre() }}
+        @if (titreAccent()) {
+          <span class="accent">{{ titreAccent() }}</span>
+        }<span class="accent-dot">.</span>
+      </h1>
+      @if (sousTitre()) {
+        <p class="hero__subtitle">{{ sousTitre() }}</p>
+      }
+    </div>
+  </header>
+
+  <main class="contenu">
+    <div class="contenu__inner">
+      <ng-content />
+    </div>
+  </main>
+
+  <footer class="pied">
+    <div class="pied__inner">
+      <span>&copy; 2026 PharmaGarde — EPF Africa</span>
+      <a routerLink="/" class="pied__lien">Espace public</a>
+    </div>
+  </footer>
+
+</div>

@@ -6,6 +6,7 @@ import com.pharmagarde.backend.application.dto.ValidationRequest;
 import com.pharmagarde.backend.application.service.PharmacieService;
 import com.pharmagarde.backend.infrastructure.security.JwtUserDetails;
 import jakarta.validation.Valid;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -13,7 +14,8 @@ import java.util.List;
 
 /**
  * Endpoints REST pour la gestion des fiches pharmacie.
- * Toute la logique (résolution du quartier, upsert, filtrage par rôle, validation) vit dans PharmacieService.
+ * Toute la logique (résolution du quartier, upsert, filtrage par rôle, validation, suppression)
+ * vit dans PharmacieService.
  */
 @RestController
 @RequestMapping("/api/pharmacies")
@@ -44,5 +46,14 @@ public class PharmacieController {
                                                @Valid @RequestBody ValidationRequest request,
                                                @AuthenticationPrincipal JwtUserDetails principal) {
         return pharmacieService.validerPharmacie(id, request, principal);
+    }
+
+    // DELETE /api/pharmacies/{id} : un superviseur supprime définitivement une pharmacie, son
+    // planning et le compte du pharmacien (RG-15). 204 : succès, sans corps de réponse.
+    @DeleteMapping("/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void supprimerPharmacie(@PathVariable Long id,
+                                    @AuthenticationPrincipal JwtUserDetails principal) {
+        pharmacieService.supprimerPharmacie(id, principal);
     }
 }

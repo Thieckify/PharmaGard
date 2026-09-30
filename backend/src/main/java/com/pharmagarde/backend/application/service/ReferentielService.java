@@ -19,10 +19,14 @@ public class ReferentielService {
         this.quartierRepository = quartierRepository;
     }
 
-    // Liste tous les quartiers avec le nom de leur zone (pour peupler un menu déroulant)
+    // Liste tous les quartiers avec le nom de leur zone et leur centre approximatif
+    // (pour peupler un menu déroulant et recentrer les cartes)
     public List<QuartierResponse> listQuartiers() {
         return quartierRepository.findAll().stream()
-                .map(q -> new QuartierResponse(q.getId(), q.getNom(), q.getZone().getId(), q.getZone().getNom()))
+                .map(q -> new QuartierResponse(
+                        q.getId(), q.getNom(),
+                        q.getZone().getId(), q.getZone().getNom(),
+                        q.getLatitude(), q.getLongitude()))
                 .toList();
     }
 }

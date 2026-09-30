@@ -1,0 +1,150 @@
+<app-page-layout
+  eyebrow="Espace pharmacien"
+  titre="Inscrivez votre"
+  titreAccent="pharmacie"
+  sousTitre="Créez votre compte et la fiche de votre pharmacie en quelques minutes. Elle apparaîtra sur l'espace public dès qu'un superviseur de votre zone l'aura validée.">
+
+  <form [formGroup]="formulaire" (ngSubmit)="onSubmit()" class="carte-formulaire">
+
+    <section class="bloc">
+      <div class="bloc__entete">
+        <span class="etape-numero">1</span>
+        <div>
+          <h2>Votre compte</h2>
+          <p>Ces identifiants vous serviront à vous connecter.</p>
+        </div>
+      </div>
+
+      <div class="champ">
+        <label for="email">Email</label>
+        <input pInputText id="email" type="email" formControlName="email" autocomplete="email"
+          placeholder="votre.email@pharmagarde.sn" />
+        @if (erreurEmail()) {
+          <p class="erreur-champ">{{ erreurEmail() }}</p>
+        } @else if (formulaire.controls.email.invalid && formulaire.controls.email.touched) {
+          <p class="erreur-champ">
+            {{ formulaire.controls.email.hasError('required') ? "L'email est obligatoire." : "Format d'email invalide." }}
+          </p>
+        }
+      </div>
+
+      <div class="champ">
+        <label for="password">Mot de passe</label>
+        <p-password inputId="password" formControlName="password" [feedback]="false" [toggleMask]="true"
+          [inputStyle]="{ width: '100%' }" placeholder="••••••••" />
+        @if (formulaire.controls.password.invalid && formulaire.controls.password.touched) {
+          <p class="erreur-champ">Le mot de passe doit contenir au moins 8 caractères.</p>
+        } @else {
+          <p class="champ__aide">8 caractères minimum.</p>
+        }
+      </div>
+    </section>
+
+    <section class="bloc">
+      <div class="bloc__entete">
+        <span class="etape-numero">2</span>
+        <div>
+          <h2>Votre pharmacie</h2>
+          <p>Ces informations seront visibles du public après validation.</p>
+        </div>
+      </div>
+
+      <div class="champ">
+        <label for="nom">Nom de la pharmacie</label>
+        <input pInputText id="nom" type="text" formControlName="nom" />
+        @if (formulaire.controls.nom.invalid && formulaire.controls.nom.touched) {
+          <p class="erreur-champ">Le nom est obligatoire.</p>
+        }
+      </div>
+
+      <div class="champ">
+        <label for="adresse">Adresse</label>
+        <input pInputText id="adresse" type="text" formControlName="adresse" />
+        @if (formulaire.controls.adresse.invalid && formulaire.controls.adresse.touched) {
+          <p class="erreur-champ">L'adresse est obligatoire.</p>
+        }
+      </div>
+
+      <div class="champ-groupe">
+        <div class="champ">
+          <label for="zoneId">Zone</label>
+          <p-select inputId="zoneId" formControlName="zoneId" [options]="zones()" optionLabel="nom"
+            optionValue="id" placeholder="Choisir une zone" />
+          @if (formulaire.controls.zoneId.invalid && formulaire.controls.zoneId.touched) {
+            <p class="erreur-champ">La zone est obligatoire.</p>
+          }
+        </div>
+
+        <div class="champ">
+          <label for="quartierId">Quartier</label>
+          <p-select inputId="quartierId" formControlName="quartierId" [options]="quartiersFiltres()"
+            optionLabel="nom" optionValue="id"
+            [placeholder]="quartiersFiltres().length ? 'Choisir un quartier' : 'Choisissez une zone'" />
+          @if (formulaire.controls.quartierId.invalid && formulaire.controls.quartierId.touched) {
+            <p class="erreur-champ">Le quartier est obligatoire.</p>
+          }
+        </div>
+      </div>
+
+      <app-selecteur-position
+        [latitude]="position()?.latitude ?? null"
+        [longitude]="position()?.longitude ?? null"
+        [centre]="centreCarte()"
+        (positionChange)="onPositionChange($event)" />
+      @if (positionManquante()) {
+        <p class="erreur-champ">Placez votre pharmacie sur la carte pour continuer.</p>
+      } @else {
+        <p class="champ__aide">
+          Obligatoire : c'est elle qui place votre pharmacie sur la carte du site. La carte
+          s'ouvre sur votre quartier dès que vous l'avez choisi ; si vous changez de quartier,
+          le repère est retiré.
+        </p>
+      }
+
+      <div class="champ">
+        <label for="telephone">Téléphone</label>
+        <input pInputText id="telephone" type="text" formControlName="telephone" placeholder="+221 33 800 00 00" />
+      </div>
+
+      <div class="champ-groupe">
+        <div class="champ">
+          <label for="horaireOuverture">Ouverture</label>
+          <input pInputText id="horaireOuverture" type="text" formControlName="horaireOuverture" />
+        </div>
+        <div class="champ">
+          <label for="horaireFermeture">Fermeture</label>
+          <input pInputText id="horaireFermeture" type="text" formControlName="horaireFermeture" />
+        </div>
+      </div>
+
+      <div class="champ">
+        <label for="numeroAgrementOrdre">Numéro d'agrément (Ordre National des Pharmaciens)</label>
+        <input pInputText id="numeroAgrementOrdre" type="text" formControlName="numeroAgrementOrdre"
+          placeholder="ONP-SN-2026-000" />
+        @if (formulaire.controls.numeroAgrementOrdre.invalid && formulaire.controls.numeroAgrementOrdre.touched) {
+          <p class="erreur-champ">Le numéro d'agrément est obligatoire.</p>
+        }
+      </div>
+    </section>
+
+    @if (messageErreur()) {
+      <p-message severity="error">{{ messageErreur() }}</p-message>
+    }
+
+    <button type="submit" class="btn-submit" [disabled]="envoiEnCours()">
+      {{ envoiEnCours() ? 'Création en cours...' : 'Créer mon compte' }}
+    </button>
+
+    <p class="note">
+      Votre fiche sera soumise à la validation d'un superviseur de votre zone avant d'apparaître
+      sur l'espace public.
+    </p>
+
+    <p class="form-footer">
+      Vous avez déjà un compte ?
+      <a routerLink="/auth/login" class="form-link">Se connecter</a>
+    </p>
+
+  </form>
+
+</app-page-layout>

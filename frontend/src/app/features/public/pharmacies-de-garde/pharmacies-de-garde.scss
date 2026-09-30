@@ -31,7 +31,9 @@
     padding: 6px 14px;
     border: 1px solid rgba(255, 255, 255, 0.2);
     border-radius: var(--pg-radius-md);
-    transition: border-color 0.2s ease, color 0.2s ease;
+    transition:
+      border-color 0.2s ease,
+      color 0.2s ease;
 
     &:hover {
       color: white;
@@ -71,7 +73,6 @@
   background: linear-gradient(135deg, var(--pg-primary-700) 0%, var(--pg-primary-900) 100%);
   position: relative;
 
-  // Texture de points discrète — donne de la matière au bandeau
   &::after {
     content: '';
     position: absolute;
@@ -81,8 +82,6 @@
     pointer-events: none;
   }
 
-  // Halo lumineux, contenu dans les limites du bandeau (pas d'overflow: hidden ici,
-  // qui découperait le calendrier du datepicker quand il se déploie vers le bas)
   &::before {
     content: '';
     position: absolute;
@@ -97,10 +96,30 @@
   &__inner {
     max-width: 1040px;
     margin: 0 auto;
-    padding: calc(var(--pg-space-2xl) * 1.4) var(--pg-space-xl) calc(var(--pg-space-2xl) * 2.2);
+    padding: calc(var(--pg-space-2xl) * 1.15) var(--pg-space-xl) calc(var(--pg-space-2xl) * 1.7);
     position: relative;
-    // Au-dessus de .resultats (z-index 2) : sinon le calendrier est masqué
     z-index: 3;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--pg-space-2xl);
+    flex-wrap: wrap;
+  }
+
+  &__content {
+    flex: 1 1 480px;
+    max-width: 560px;
+  }
+
+  &__aside {
+    flex-shrink: 0;
+  }
+
+  &__stats {
+    display: flex;
+    gap: var(--pg-space-md);
+    margin-top: var(--pg-space-xl);
+    flex-wrap: wrap;
   }
 
   &__eyebrow {
@@ -140,19 +159,78 @@
     line-height: 1.6;
     color: rgba(255, 255, 255, 0.7);
     max-width: 520px;
-    margin: 0 0 calc(var(--pg-space-2xl) * 0.8);
+    margin: 0;
+  }
+}
+
+.stat-item {
+  flex: 1;
+  min-width: 150px;
+  display: flex;
+  align-items: center;
+  gap: var(--pg-space-sm);
+  padding: var(--pg-space-md) var(--pg-space-lg);
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: var(--pg-radius-lg);
+
+  &__icone {
+    width: 36px;
+    height: 36px;
+    border-radius: var(--pg-radius-md);
+    background: rgba(255, 255, 255, 0.08);
+    color: var(--pg-accent-gold);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+
+    svg {
+      width: 18px;
+      height: 18px;
+    }
+  }
+
+  &__valeur {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: white;
+    letter-spacing: -0.02em;
+    line-height: 1.1;
+  }
+
+  &__label {
+    font-size: 0.75rem;
+    color: rgba(255, 255, 255, 0.6);
+    margin-top: 2px;
   }
 }
 
 .recherche {
-  display: inline-flex;
+  display: flex;
   flex-direction: column;
-  gap: var(--pg-space-xs);
+  gap: var(--pg-space-sm);
   background: var(--pg-surface-0);
   border-radius: var(--pg-radius-lg);
   box-shadow: var(--pg-shadow-lg);
   padding: var(--pg-space-lg);
-  min-width: 260px;
+  width: 420px;
+  position: relative;
+
+  // Liseré signature teal -> or, qui épouse les coins arrondis de la carte. Pas de
+  // overflow: hidden ici (il couperait le calendrier et les listes déroulantes PrimeNG) :
+  // on reproduit l'effet avec un calque de la taille de la carte, aux mêmes coins arrondis,
+  // dont un cache ne laisse visibles que les 3px du haut.
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: var(--pg-radius-lg);
+    background: linear-gradient(90deg, var(--pg-primary-500), var(--pg-accent-gold));
+    -webkit-mask-image: linear-gradient(#000 0, #000 3px, transparent 3px);
+    mask-image: linear-gradient(#000 0, #000 3px, transparent 3px);
+    pointer-events: none;
+  }
 
   label {
     font-size: 0.75rem;
@@ -161,6 +239,111 @@
     text-transform: uppercase;
     color: var(--pg-surface-500);
   }
+}
+
+.recherche__onglets {
+  display: flex;
+  gap: 2px;
+  padding: 3px;
+  background: var(--pg-surface-100);
+  border-radius: var(--pg-radius-md);
+  margin-bottom: var(--pg-space-sm);
+}
+
+// Date + quartier côte à côte (au lieu d'empilés) : économise une rangée entière de
+// hauteur dans la carte de recherche, cf. onglet "Par date"
+.recherche__champs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--pg-space-sm);
+}
+
+.champ {
+  display: flex;
+  flex-direction: column;
+  gap: var(--pg-space-xs);
+  min-width: 0; // évite qu'un input PrimeNG ne fasse déborder sa colonne de grille
+}
+
+.onglet {
+  flex: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  appearance: none;
+  -webkit-appearance: none;
+  border: none;
+  font: inherit;
+  padding: 8px 12px;
+  background: transparent;
+  border-radius: calc(var(--pg-radius-md) - 3px);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--pg-surface-500);
+  cursor: pointer;
+  line-height: 1.2;
+  white-space: nowrap;
+  transition: background 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
+
+  svg {
+    width: 14px;
+    height: 14px;
+    flex-shrink: 0;
+  }
+
+  &:hover:not(&--actif) {
+    color: var(--pg-surface-700);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--pg-primary-500);
+    outline-offset: 2px;
+  }
+
+  &--actif {
+    background: var(--pg-primary-600);
+    color: white;
+    box-shadow: var(--pg-shadow-sm);
+  }
+}
+
+.btn-position {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  align-self: flex-start;
+  padding: 7px 12px;
+  border: 1px solid var(--pg-surface-200);
+  background: var(--pg-surface-0);
+  border-radius: var(--pg-radius-md);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--pg-primary-700);
+  cursor: pointer;
+  transition: border-color 0.2s ease, background 0.2s ease;
+
+  svg {
+    width: 14px;
+    height: 14px;
+    color: var(--pg-accent-gold);
+  }
+
+  &:hover:not(:disabled) {
+    border-color: var(--pg-primary-500);
+    background: var(--pg-primary-50);
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: default;
+  }
+}
+
+.erreur-position {
+  font-size: 0.75rem;
+  color: var(--pg-surface-500);
+  margin: 0;
 }
 
 // Feuille pleine largeur qui remonte sur le bandeau : la transition se fait
@@ -200,6 +383,36 @@
   }
 }
 
+// Recherche par quartier ET par date : liste à gauche, carte à droite, la carte reste
+// visible pendant le scroll de la liste (position: sticky).
+.resultats-layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--pg-space-lg);
+  align-items: start;
+}
+
+.carte-panneau {
+  position: sticky;
+  top: var(--pg-space-lg);
+  height: 560px;
+  border-radius: var(--pg-radius-lg);
+  overflow: hidden;
+  box-shadow: var(--pg-shadow-md);
+  border: 1px solid var(--pg-surface-200);
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--pg-primary-500), var(--pg-accent-gold));
+    z-index: 1000;
+  }
+}
+
 .liste-pharmacies {
   display: grid;
   gap: var(--pg-space-md);
@@ -213,7 +426,10 @@
   padding: var(--pg-space-xl);
   position: relative;
   overflow: hidden;
-  transition: box-shadow 0.25s ease, transform 0.25s ease, border-color 0.25s ease;
+  transition:
+    box-shadow 0.25s ease,
+    transform 0.25s ease,
+    border-color 0.25s ease;
 
   &::before {
     content: '';
@@ -254,6 +470,11 @@
     color: var(--pg-surface-500);
     font-size: 0.8125rem;
     margin: 0;
+
+    strong {
+      color: var(--pg-surface-700);
+      font-weight: 600;
+    }
   }
 
   &__bas {
@@ -281,6 +502,12 @@
   }
 }
 
+.carte-pharmacie__sans-position {
+  font-size: 0.8125rem;
+  color: var(--pg-surface-500);
+  font-style: italic;
+}
+
 .btn {
   display: inline-flex;
   align-items: center;
@@ -290,7 +517,10 @@
   font-size: 0.875rem;
   font-weight: 500;
   text-decoration: none;
-  transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+  transition:
+    background 0.2s ease,
+    border-color 0.2s ease,
+    color 0.2s ease;
 
   svg {
     width: 15px;
@@ -339,7 +569,6 @@
     background: var(--pg-success);
     position: relative;
 
-    // Halo qui pulse : signale visuellement une garde en cours
     &::after {
       content: '';
       position: absolute;
@@ -350,12 +579,29 @@
       animation: pulse-garde 2s ease-out infinite;
     }
   }
+
+  // Version neutre pour la recherche par quartier : pas de garde, juste des horaires
+  // normaux — gris et statique (pas de pulsation), délibérément à l'opposé visuel du
+  // badge vert qui pulse ci-dessus, pour que la différence soit lisible en un coup d'œil.
+  &--neutre {
+    background: var(--pg-surface-100);
+    color: var(--pg-surface-500);
+  }
 }
 
 @keyframes pulse-garde {
-  0%   { transform: scale(0.6); opacity: 0.4; }
-  70%  { transform: scale(1.4); opacity: 0; }
-  100% { transform: scale(1.4); opacity: 0; }
+  0% {
+    transform: scale(0.6);
+    opacity: 0.4;
+  }
+  70% {
+    transform: scale(1.4);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1.4);
+    opacity: 0;
+  }
 }
 
 .etat-info,
@@ -481,7 +727,9 @@
   border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: var(--pg-radius-lg);
   text-decoration: none;
-  transition: background 0.2s ease, border-color 0.2s ease;
+  transition:
+    background 0.2s ease,
+    border-color 0.2s ease;
 
   &:hover {
     background: rgba(255, 255, 255, 0.09);
@@ -533,14 +781,35 @@
     font-size: 2rem;
   }
 
+  .hero__stats {
+    flex-direction: column;
+  }
+
+  // Sans largeur ici, le width: 100% de .recherche n'aurait rien à quoi se rapporter
+  .hero__aside {
+    width: 100%;
+  }
+
   .etapes,
   .urgences__liste {
     grid-template-columns: 1fr;
   }
 
   .recherche {
-    display: flex;
     width: 100%;
+  }
+
+  .recherche__champs {
+    grid-template-columns: 1fr;
+  }
+
+  .resultats-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .carte-panneau {
+    position: static;
+    height: 320px;
   }
 
   .carte-pharmacie__top {
