@@ -1,30 +1,262 @@
-<div class="page-wrapper">
-  <div class="page">
-    <header class="dashboard-header">
-      <div>
-        <div class="page-header__eyebrow">
-          <span class="accent-dot">●</span> Tableau de bord
-        </div>
-        <h1>Bienvenue sur PharmaGarde</h1>
-      </div>
-      <p-button label="Se déconnecter" severity="secondary" (onClick)="logout()" />
-    </header>
+<app-page-layout
+  eyebrow="Tableau de bord"
+  [titre]="titre()"
+  [titreAccent]="titreAccent()"
+  [sousTitre]="sousTitre()">
 
-    @if (authService.currentUser(); as user) {
-      <section class="user-card">
-        <h2>Vous êtes connecté</h2>
-        <ul>
-          <li><strong>Email :</strong> {{ user.email }}</li>
-          <li><strong>Rôle :</strong> {{ user.role }}</li>
-          <li><strong>User ID :</strong> {{ user.userId }}</li>
-          @if (user.tenantId) {
-            <li><strong>Tenant ID :</strong> {{ user.tenantId }} (pharmacie)</li>
-          }
-          @if (user.zoneId) {
-            <li><strong>Zone ID :</strong> {{ user.zoneId }}</li>
-          }
-        </ul>
+  @if (estPharmacien()) {
+
+    @if (chargement()) {
+      <section class="carte">
+        <p class="etat">Chargement de votre tableau de bord...</p>
       </section>
+    } @else if (erreur()) {
+      <section class="carte">
+        <p class="etat etat--erreur">{{ erreur() }}</p>
+      </section>
+    } @else {
+
+      <section class="carte">
+        <div class="carte__entete">
+          <h2>Ma fiche</h2>
+          @if (fiche(); as f) {
+            <span class="statut" [class.statut--attente]="!f.active">
+              <span class="statut__point"></span>
+              {{ f.active ? 'Fiche validée' : 'En attente de validation' }}
+            </span>
+          }
+        </div>
+
+        @if (fiche(); as f) {
+          <p class="carte__nom">{{ f.nom }}</p>
+          <p class="carte__detail">{{ f.adresse }}</p>
+          <p class="carte__detail carte__detail--discret">{{ f.nomQuartier }} · {{ f.nomZone }}</p>
+
+          @if (f.active) {
+            <p class="carte__resume">Votre pharmacie est visible sur le site.</p>
+          } @else {
+            <p class="avis">
+              Votre fiche attend la validation d'un superviseur : elle n'apparaît pas encore sur
+              le site, et vous ne pouvez pas encore déclarer de garde.
+            </p>
+          }
+
+          @if (f.latitude == null || f.longitude == null) {
+            <p class="avis">
+              Votre position n'est pas renseignée : votre pharmacie n'apparaît pas sur la carte du
+              site. Ajoutez-la dans « Ma fiche ».
+            </p>
+          }
+
+          <div class="actions">
+            <a routerLink="/pharmacies/ma-fiche" class="btn btn--secondaire">Modifier ma fiche</a>
+          </div>
+        } @else {
+          <p class="carte__resume">
+            Vous n'avez pas encore de fiche : sans elle, votre pharmacie n'apparaît pas sur le site.
+          </p>
+          <div class="actions">
+            <a routerLink="/pharmacies/ma-fiche" class="btn btn--primaire">Créer ma fiche</a>
+          </div>
+        }
+      </section>
+
+      @if (fiche(); as f) {
+        <section class="carte">
+          <div class="carte__entete">
+            <h2>Prochaine garde</h2>
+            @if (prochaineGarde()) {
+              <span class="etiquette" [class.etiquette--en-cours]="enCours()">
+                {{ enCours() ? 'En cours' : 'À venir' }}
+              </span>
+            }
+          </div>
+
+          @if (chargementPlanning()) {
+            <p class="carte__detail carte__detail--discret">Chargement de votre planning...</p>
+          } @else if (erreurPlanning()) {
+            <p class="avis">Impossible de charger votre planning pour le moment.</p>
+          } @else if (prochaineGarde(); as g) {
+            <p class="carte__periode">
+              {{ g.dateDebut | date: 'dd/MM/yyyy' }} → {{ g.dateFin | date: 'dd/MM/yyyy' }}
+            </p>
+            <p class="carte__detail carte__detail--discret">{{ libelleType(g.type) }}</p>
+            @if (autresPeriodes() > 0) {
+              <p class="carte__detail carte__detail--discret">
+                et {{ autresPeriodes() }} autre{{ autresPeriodes() > 1 ? 's' : '' }}
+                période{{ autresPeriodes() > 1 ? 's' : '' }} à venir.
+              </p>
+            }
+            <div class="actions">
+              <a routerLink="/pharmacies/mon-planning" class="btn btn--secondaire">Gérer mon planning</a>
+            </div>
+          } @else {
+            @if (f.active) {
+              <p class="carte__resume">Aucune période de garde à venir.</p>
+              <div class="actions">
+                <a routerLink="/pharmacies/mon-planning" class="btn btn--primaire">Déclarer une garde</a>
+              </div>
+            } @else {
+              <p class="carte__resume">Vous pourrez déclarer vos gardes dès que votre fiche sera validée.</p>
+            }
+          }
+        </section>
+      }
+
+      @if (!chargementPlanning() && !erreurPlanning() && gardes().length > 0) {
+        <section class="carte">
+          <div class="carte__entete">
+            <h2>Vos gardes en chiffres</h2>
+          </div>
+
+          <div class="tuiles tuiles--trois">
+            <div class="tuile tuile--garde">
+              <span class="tuile__valeur">{{ nbGardesAVenir() }}</span>
+              <span class="tuile__label">période{{ nbGardesAVenir() > 1 ? 's' : '' }} à venir ou en cours</span>
+            </div>
+            <div class="tuile tuile--garde">
+              <span class="tuile__valeur">{{ joursGardeMois() }}</span>
+              <span class="tuile__label">jour{{ joursGardeMois() > 1 ? 's' : '' }} de garde en {{ nomDuMois }}</span>
+            </div>
+            <div class="tuile tuile--garde">
+              <span class="tuile__valeur">{{ joursGardeAnnee() }}</span>
+              <span class="tuile__label">jour{{ joursGardeAnnee() > 1 ? 's' : '' }} de garde en {{ anneeCourante }}</span>
+            </div>
+          </div>
+        </section>
+      }
+
     }
-  </div>
-</div>
+
+  } @else if (estSuperviseur()) {
+
+    <section class="carte">
+      <div class="carte__entete">
+        <h2>Vue d'ensemble</h2>
+      </div>
+
+      @if (chargement()) {
+        <p class="etat">Chargement de vos fiches...</p>
+      } @else if (erreur()) {
+        <p class="etat etat--erreur">{{ erreur() }}</p>
+      } @else {
+        <div class="tuiles">
+          <div class="tuile tuile--attente">
+            <span class="tuile__valeur">{{ nbEnAttente() }}</span>
+            <span class="tuile__label">à valider</span>
+          </div>
+          <div class="tuile tuile--validee">
+            <span class="tuile__valeur">{{ nbValidees() }}</span>
+            <span class="tuile__label">validée{{ nbValidees() > 1 ? 's' : '' }}</span>
+          </div>
+          <div class="tuile">
+            <span class="tuile__valeur">{{ nbSansPosition() }}</span>
+            <span class="tuile__label">sans position</span>
+          </div>
+          <div class="tuile tuile--semaine">
+            <span class="tuile__valeur">{{ nbValideesSemaine() }}</span>
+            <span class="tuile__label">validée{{ nbValideesSemaine() > 1 ? 's' : '' }} cette semaine</span>
+          </div>
+        </div>
+
+        <div class="actions">
+          <a routerLink="/pharmacies" class="btn btn--primaire">
+            Modérer les pharmacies
+            @if (nbEnAttente() > 0) {
+              <span class="pastille">{{ nbEnAttente() }}</span>
+            }
+          </a>
+        </div>
+      }
+    </section>
+
+    <section class="carte">
+      <div class="carte__entete">
+        <h2>Gardes d'aujourd'hui, par zone</h2>
+      </div>
+
+      @if (chargementCouverture() || chargement()) {
+        <p class="etat">Chargement des gardes du jour...</p>
+      } @else if (erreurCouverture()) {
+        <p class="avis">Impossible de charger les gardes du jour pour le moment.</p>
+      } @else {
+
+        @if (zonesSansGarde().length > 0) {
+          <p class="avis">
+            Aucune pharmacie de garde aujourd'hui {{ zonesSansGarde().length > 1 ? 'dans les zones' : 'dans la zone' }} :
+            {{ zonesSansGarde().join(', ') }}.
+          </p>
+        }
+
+        <div class="zones">
+          <div class="zones__entete">
+            <span>Zone</span>
+            <span>Pharmacies</span>
+            <span class="zones__entete-droite">De garde</span>
+          </div>
+
+          @for (l of lignesZones(); track l.id) {
+            <div class="zone">
+              <span class="zone__nom">{{ l.nom }}</span>
+
+              <div class="zone__pharmacies">
+                @if (l.validees + l.enAttente === 0) {
+                  <span class="zone__detail">Aucune pharmacie</span>
+                } @else {
+                  <div class="barre">
+                    <span class="barre__validees" [style.width.%]="l.validees / maxParZone() * 100"></span>
+                    <span class="barre__attente" [style.width.%]="l.enAttente / maxParZone() * 100"></span>
+                  </div>
+                  <span class="zone__detail">
+                    {{ l.validees }} validée{{ l.validees > 1 ? 's' : '' }} · {{ l.enAttente }} en attente
+                  </span>
+                }
+              </div>
+
+              @switch (l.couverture) {
+                @case ('ok') {
+                  <span class="couverture couverture--ok">{{ l.deGarde }} de garde</span>
+                }
+                @case ('alerte') {
+                  <span class="couverture couverture--alerte">Aucune garde</span>
+                }
+                @default {
+                  <span class="couverture couverture--vide">Aucune validée</span>
+                }
+              }
+            </div>
+          }
+        </div>
+
+      }
+    </section>
+
+    <section class="carte">
+      <div class="carte__entete">
+        <h2>Votre compte</h2>
+      </div>
+      @if (utilisateur(); as u) {
+        <ul class="infos">
+          <li><span>Email</span><strong>{{ u.email }}</strong></li>
+          <li><span>Rôle</span><strong>{{ libelleRole(u.role) }}</strong></li>
+        </ul>
+      }
+    </section>
+
+  } @else {
+
+    <section class="carte">
+      <div class="carte__entete">
+        <h2>Votre compte</h2>
+      </div>
+      @if (utilisateur(); as u) {
+        <ul class="infos">
+          <li><span>Email</span><strong>{{ u.email }}</strong></li>
+          <li><span>Rôle</span><strong>{{ libelleRole(u.role) }}</strong></li>
+        </ul>
+      }
+    </section>
+
+  }
+
+</app-page-layout>
