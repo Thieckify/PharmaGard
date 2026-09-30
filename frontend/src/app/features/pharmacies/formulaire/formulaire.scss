@@ -1,147 +1,67 @@
-.page-wrapper {
-  min-height: 100vh;
-  background: linear-gradient(180deg, var(--pg-primary-50) 0%, var(--pg-surface-50) 400px);
-}
+@use '../../../shared/styles/formulaire';
 
-.page {
-  max-width: 560px;
-  margin: 0 auto;
-  padding: var(--pg-space-2xl) var(--pg-space-xl);
-}
-
-.page-header {
-  margin-bottom: var(--pg-space-xl);
-
-  &__eyebrow {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    font-size: 0.8125rem;
-    font-weight: 600;
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
-    color: var(--pg-primary-600);
-    margin-bottom: var(--pg-space-xs);
-  }
-
-  h1 {
-    font-size: 1.75rem;
-    margin-bottom: var(--pg-space-xs);
-  }
-
-  &__subtitle {
-    color: var(--pg-surface-500);
-    margin: 0;
-  }
-}
-
-.accent-dot {
-  color: var(--pg-accent-gold);
-  font-size: 0.625rem;
-}
-
-.carte-formulaire {
-  display: flex;
-  flex-direction: column;
-  gap: var(--pg-space-md);
-  background: var(--pg-surface-0);
-  border: 1px solid var(--pg-surface-200);
-  border-radius: var(--pg-radius-lg);
-  box-shadow: var(--pg-shadow-md);
-  padding: var(--pg-space-xl);
-  position: relative;
-  overflow: hidden;
-
-  &::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 3px;
-    background: linear-gradient(90deg, var(--pg-primary-500), var(--pg-accent-gold));
-  }
-}
-
-.champ-groupe {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: var(--pg-space-md);
-}
-
-.champ {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.champ__aide {
-  font-size: 0.75rem;
+.etat-info {
   color: var(--pg-surface-500);
   margin: 0;
 }
 
-label {
-  font-size: 0.8125rem;
-  font-weight: 500;
-  color: var(--pg-surface-700);
-}
-
-input,
-select {
-  width: 100%;
-  padding: 10px var(--pg-space-sm);
-  border: 1px solid var(--pg-surface-300);
-  border-radius: var(--pg-radius-sm);
-  font-family: var(--pg-font-sans);
-  font-size: 0.9375rem;
-  color: var(--pg-surface-900);
-  background: var(--pg-surface-0);
-  transition: border-color 0.15s ease, box-shadow 0.15s ease;
-
-  &:focus {
-    outline: none;
-    border-color: var(--pg-primary-500);
-    box-shadow: 0 0 0 3px var(--pg-primary-100);
-  }
-}
-
-.submit-btn {
-  margin-top: var(--pg-space-sm);
-  padding: 12px var(--pg-space-lg);
-  background: var(--pg-primary-600);
-  color: white;
-  border: none;
-  border-radius: var(--pg-radius-sm);
+// Pastille de statut de la fiche : même famille que sur la page publique.
+// Verte avec un halo qui pulse quand la fiche est validée, grise et fixe quand elle attend.
+.statut {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  font-size: 0.75rem;
   font-weight: 600;
-  font-size: 0.9375rem;
-  cursor: pointer;
-  transition: background 0.15s ease;
-
-  &:hover:not(:disabled) {
-    background: var(--pg-primary-700);
-  }
-
-  &:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-  }
-}
-
-.erreur-champ {
-  color: var(--pg-error);
-  font-size: 0.8125rem;
-  margin: 0;
-}
-
-.succes {
+  white-space: nowrap;
+  background: rgba(16, 185, 129, 0.1);
   color: var(--pg-success);
-  font-weight: 500;
-  margin: 0;
+
+  &__point {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--pg-success);
+    position: relative;
+
+    &::after {
+      content: '';
+      position: absolute;
+      inset: -4px;
+      border-radius: 50%;
+      background: var(--pg-success);
+      opacity: 0.35;
+      animation: pulse-statut 2s ease-out infinite;
+    }
+  }
+
+  &--attente {
+    background: var(--pg-surface-100);
+    color: var(--pg-surface-500);
+
+    .statut__point {
+      background: var(--pg-surface-500);
+
+      &::after {
+        display: none;
+      }
+    }
+  }
 }
 
-.erreur {
-  color: var(--pg-error);
-  font-weight: 500;
-  margin: 0;
+@keyframes pulse-statut {
+  0% {
+    transform: scale(0.6);
+    opacity: 0.4;
+  }
+  70% {
+    transform: scale(1.4);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1.4);
+    opacity: 0;
+  }
 }

@@ -1,27 +1,41 @@
-<div class="page-wrapper">
-  <div class="page">
-    <header class="page-header">
-      <div class="page-header__eyebrow">
-        <span class="accent-dot">●</span> Ma pharmacie
-      </div>
-      <h1>Fiche de votre pharmacie</h1>
-      <p class="page-header__subtitle">Ces informations seront visibles après validation par un superviseur.</p>
-    </header>
+<app-page-layout
+  eyebrow="Ma pharmacie"
+  titre="Fiche de votre"
+  titreAccent="pharmacie"
+  sousTitre="Ces informations seront visibles après validation par un superviseur.">
 
+  @if (chargement()) {
+    <div class="carte-formulaire">
+      <p class="etat-info">Chargement de votre fiche...</p>
+    </div>
+  } @else if (erreurChargement()) {
+    <div class="carte-formulaire">
+      <p-message severity="error">{{ erreurChargement() }}</p-message>
+    </div>
+  } @else {
     <form [formGroup]="formulaire" (ngSubmit)="onSubmit()" class="carte-formulaire">
+
+      @if (fiche(); as f) {
+        <div>
+          <span class="statut" [class.statut--attente]="!f.active">
+            <span class="statut__point"></span>
+            {{ f.active ? 'Fiche validée' : 'En attente de validation' }}
+          </span>
+        </div>
+      }
 
       <div class="champ">
         <label for="nom">Nom de la pharmacie</label>
-        <input id="nom" type="text" formControlName="nom" />
-        @if (formulaire.get('nom')?.invalid && formulaire.get('nom')?.touched) {
+        <input pInputText id="nom" type="text" formControlName="nom" />
+        @if (formulaire.controls.nom.invalid && formulaire.controls.nom.touched) {
           <p class="erreur-champ">Le nom est obligatoire.</p>
         }
       </div>
 
       <div class="champ">
         <label for="adresse">Adresse</label>
-        <input id="adresse" type="text" formControlName="adresse" />
-        @if (formulaire.get('adresse')?.invalid && formulaire.get('adresse')?.touched) {
+        <input pInputText id="adresse" type="text" formControlName="adresse" />
+        @if (formulaire.controls.adresse.invalid && formulaire.controls.adresse.touched) {
           <p class="erreur-champ">L'adresse est obligatoire.</p>
         }
       </div>
@@ -29,83 +43,89 @@
       <div class="champ-groupe">
         <div class="champ">
           <label for="zoneId">Zone</label>
-          <select id="zoneId" formControlName="zoneId">
-            <option [ngValue]="null">-- Choisir --</option>
-            @for (zone of zones(); track zone.id) {
-              <option [ngValue]="zone.id">{{ zone.nom }}</option>
-            }
-          </select>
-          @if (formulaire.get('zoneId')?.invalid && formulaire.get('zoneId')?.touched) {
-            <p class="erreur-champ">Obligatoire.</p>
+          <p-select inputId="zoneId" formControlName="zoneId" [options]="zones()" optionLabel="nom"
+            optionValue="id" placeholder="Choisir une zone" />
+          @if (formulaire.controls.zoneId.invalid && formulaire.controls.zoneId.touched) {
+            <p class="erreur-champ">La zone est obligatoire.</p>
           }
         </div>
 
         <div class="champ">
           <label for="quartierId">Quartier</label>
-          <select id="quartierId" formControlName="quartierId">
-            <option [ngValue]="null">-- Choisir --</option>
-            @for (quartier of quartiersFiltres(); track quartier.id) {
-              <option [ngValue]="quartier.id">{{ quartier.nom }}</option>
-            }
-          </select>
-          @if (formulaire.get('quartierId')?.invalid && formulaire.get('quartierId')?.touched) {
-            <p class="erreur-champ">Obligatoire.</p>
+          <p-select inputId="quartierId" formControlName="quartierId" [options]="quartiersFiltres()"
+            optionLabel="nom" optionValue="id"
+            [placeholder]="quartiersFiltres().length ? 'Choisir un quartier' : 'Choisissez une zone'" />
+          @if (formulaire.controls.quartierId.invalid && formulaire.controls.quartierId.touched) {
+            <p class="erreur-champ">Le quartier est obligatoire.</p>
           }
         </div>
       </div>
 
-      <div class="champ">
-        <app-selecteur-position
-          [latitude]="position()?.latitude ?? null"
-          [longitude]="position()?.longitude ?? null"
-          [centre]="centreCarte()"
-          (positionChange)="onPositionChange($event)" />
-        @if (positionManquante()) {
-          <p class="erreur-champ">Placez votre pharmacie sur la carte pour enregistrer.</p>
-        } @else {
-          <p class="champ__aide">
-            Obligatoire. La carte s'ouvre sur votre quartier dès que vous l'avez choisi ; si vous
-            changez de quartier, le repère est retiré.
-          </p>
-        }
-      </div>
+      @if (changementDeZone()) {
+        <p class="alerte">
+          Changer de zone remet votre fiche en attente de validation : le superviseur de la
+          nouvelle zone devra la valider à nouveau avant qu'elle réapparaisse sur le site.
+        </p>
+      }
+
+      <app-selecteur-position
+        [latitude]="position()?.latitude ?? null"
+        [longitude]="position()?.longitude ?? null"
+        [centre]="centreCarte()"
+        (positionChange)="onPositionChange($event)" />
+      @if (positionManquante()) {
+        <p class="erreur-champ">Placez votre pharmacie sur la carte pour enregistrer.</p>
+      } @else {
+        <p class="champ__aide">
+          Obligatoire : c'est elle qui place votre pharmacie sur la carte du site. La carte
+          s'ouvre sur votre quartier dès que vous l'avez choisi ; si vous changez de quartier,
+          le repère est retiré.
+        </p>
+      }
 
       <div class="champ">
         <label for="telephone">Téléphone</label>
-        <input id="telephone" type="text" formControlName="telephone" />
+        <input pInputText id="telephone" type="text" formControlName="telephone" placeholder="+221 33 800 00 00" />
       </div>
 
       <div class="champ-groupe">
         <div class="champ">
           <label for="horaireOuverture">Ouverture</label>
-          <input id="horaireOuverture" type="text" formControlName="horaireOuverture" />
+          <input pInputText id="horaireOuverture" type="text" formControlName="horaireOuverture" />
         </div>
-
         <div class="champ">
           <label for="horaireFermeture">Fermeture</label>
-          <input id="horaireFermeture" type="text" formControlName="horaireFermeture" />
+          <input pInputText id="horaireFermeture" type="text" formControlName="horaireFermeture" />
         </div>
       </div>
 
-      <div class="champ">
-        <label for="numeroAgrementOrdre">Numéro d'agrément (Ordre National des Pharmaciens)</label>
-        <input id="numeroAgrementOrdre" type="text" formControlName="numeroAgrementOrdre" />
-        @if (formulaire.get('numeroAgrementOrdre')?.invalid && formulaire.get('numeroAgrementOrdre')?.touched) {
-          <p class="erreur-champ">Le numéro d'agrément est obligatoire.</p>
-        }
-      </div>
-
-      <button type="submit" class="submit-btn" [disabled]="envoiEnCours()">
-        {{ envoiEnCours() ? 'Enregistrement...' : 'Enregistrer' }}
-      </button>
+      @if (fiche() == null) {
+        <div class="champ">
+          <label for="numeroAgrementOrdre">Numéro d'agrément (Ordre National des Pharmaciens)</label>
+          <input pInputText id="numeroAgrementOrdre" type="text" formControlName="numeroAgrementOrdre"
+            placeholder="ONP-SN-2026-000" />
+          @if (formulaire.controls.numeroAgrementOrdre.invalid && formulaire.controls.numeroAgrementOrdre.touched) {
+            <p class="erreur-champ">Le numéro d'agrément est obligatoire.</p>
+          }
+        </div>
+      } @else {
+        <p class="champ__aide">
+          Votre numéro d'agrément est enregistré : il ne peut plus être modifié.
+        </p>
+      }
 
       @if (messageSucces()) {
         <p class="succes">{{ messageSucces() }}</p>
       }
       @if (messageErreur()) {
-        <p class="erreur">{{ messageErreur() }}</p>
+        <p-message severity="error">{{ messageErreur() }}</p-message>
       }
 
+      <button type="submit" class="btn-submit" [disabled]="envoiEnCours()">
+        {{ envoiEnCours() ? 'Enregistrement...' : (fiche() == null ? 'Créer ma fiche' : 'Enregistrer les modifications') }}
+      </button>
+
     </form>
-  </div>
-</div>
+  }
+
+</app-page-layout>
