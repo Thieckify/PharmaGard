@@ -1,9 +1,14 @@
 package com.pharmagarde.backend.adapter.web.advice;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.TypeMismatchException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.validation.FieldError;
+import org.springframework.web.ErrorResponse;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -21,6 +26,8 @@ import java.util.Map;
  */
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+
+    private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
     // Échec de login (mauvais email/mot de passe) -> 401, avec un message volontairement
     // vague : on ne précise jamais si c'est l'email ou le mot de passe qui est faux,
@@ -61,12 +68,54 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(corps);
     }
 
-    // Filet de sécurité : toute exception vraiment inattendue (bug) -> 500 explicite,
-    // plutôt que de la laisser remonter au conteneur et se faire masquer en 401.
+    // Corps de requête illisible : JSON mal formé, ou valeur d'un mauvais type (un texte à la place
+    // d'un nombre...) -> 400. Cette exception ne porte pas de code HTTP : il faut la traiter ici.
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<Map<String, Object>> gererCorpsIllisible(HttpMessageNotReadableException ex) {
+        return reponse(HttpStatus.BAD_REQUEST, "Corps de la requête illisible ou mal formé");
+    }
+
+    // Paramètre d'URL d'un mauvais type (date=abc, identifiant non numérique...) -> 400.
+    // Même remarque : cette exception ne porte pas de code HTTP.
+    @ExceptionHandler(TypeMismatchException.class)
+    public ResponseEntity<Map<String, Object>> gererParametreInvalide(TypeMismatchException ex) {
+        return reponse(HttpStatus.BAD_REQUEST, "Valeur invalide pour un paramètre de la requête");
+    }
+
+    // Filet de sécurité, en deux temps.
+    // 1) Les erreurs HTTP levées par Spring lui-même avant d'atteindre un controller : URL
+    //    inexistante (404), méthode non autorisée (405), type de contenu non pris en charge (415)...
+    //    Elles portent déjà leur code (interface ErrorResponse) : on le respecte, au lieu de les
+    //    transformer en 500 alors que c'est l'appelant qui s'est trompé.
+    // 2) Tout le reste est un vrai bug : 500 explicite, et surtout journalisé. Sans cette ligne de
+    //    log, une vraie panne ne laisserait aucune trace dans la console.
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Map<String, Object>> gererExceptionGenerique(Exception ex) {
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(corpsErreur(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Erreur interne du serveur"));
+        if (ex instanceof ErrorResponse erreurHttp && erreurHttp.getStatusCode().is4xxClientError()) {
+            int status = erreurHttp.getStatusCode().value();
+            return ResponseEntity.status(status)
+                    .headers(erreurHttp.getHeaders())
+                    .body(corpsErreur(status, messagePourStatut(status)));
+        }
+
+        log.error("Erreur inattendue", ex);
+        return reponse(HttpStatus.INTERNAL_SERVER_ERROR, "Erreur interne du serveur");
+    }
+
+    // Message en français pour les erreurs HTTP de Spring (dont les textes d'origine sont en anglais)
+    private String messagePourStatut(int status) {
+        return switch (status) {
+            case 400 -> "Requête invalide";
+            case 404 -> "Ressource introuvable";
+            case 405 -> "Méthode HTTP non autorisée sur cette route";
+            case 406 -> "Format de réponse non disponible";
+            case 415 -> "Type de contenu non pris en charge";
+            default -> "Requête refusée";
+        };
+    }
+
+    private ResponseEntity<Map<String, Object>> reponse(HttpStatus statut, String message) {
+        return ResponseEntity.status(statut).body(corpsErreur(statut.value(), message));
     }
 
     // Construit un corps de réponse JSON cohérent, dans le même format que celui déjà
