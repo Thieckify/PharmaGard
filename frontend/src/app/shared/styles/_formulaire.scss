@@ -1,0 +1,132 @@
+// Styles communs aux formulaires en carte (page d'inscription, ma fiche). Chaque page les
+// importe avec @use : les règles sont alors copiées dans le style de la page, donc limitées
+// à elle. Un seul endroit pour retoucher l'apparence des champs.
+
+// Le liseré signature teal -> or épouse les coins arrondis de la carte. Pas de
+// overflow: hidden ici (il couperait les listes déroulantes PrimeNG) : on reproduit l'effet
+// avec un calque de la taille de la carte, dont un cache ne laisse visibles que les 3px du haut.
+.carte-formulaire {
+  display: flex;
+  flex-direction: column;
+  gap: var(--pg-space-md);
+  background: var(--pg-surface-0);
+  border: 1px solid var(--pg-surface-200);
+  border-radius: var(--pg-radius-lg);
+  box-shadow: var(--pg-shadow-lg);
+  padding: var(--pg-space-xl);
+  position: relative;
+
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    // 1px de moins que la carte : le calque s'arrête à l'intérieur de sa bordure
+    border-radius: calc(var(--pg-radius-lg) - 1px);
+    background: linear-gradient(90deg, var(--pg-primary-500), var(--pg-accent-gold));
+    -webkit-mask-image: linear-gradient(#000 0, #000 3px, transparent 3px);
+    mask-image: linear-gradient(#000 0, #000 3px, transparent 3px);
+    pointer-events: none;
+  }
+}
+
+.champ-groupe {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--pg-space-md);
+}
+
+.champ {
+  display: flex;
+  flex-direction: column;
+  gap: var(--pg-space-xs);
+  min-width: 0; // évite qu'un composant PrimeNG ne fasse déborder sa colonne de grille
+
+  label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--pg-surface-500);
+  }
+
+  // Force les champs à prendre toute la largeur (même astuce que la page de connexion)
+  :is(input, .p-password) {
+    width: 100%;
+  }
+
+  &__aide {
+    font-size: 0.75rem;
+    color: var(--pg-surface-500);
+    margin: 0;
+  }
+}
+
+// Aide sous un champ, en dehors d'un .champ (ex. sous la carte de position)
+.champ__aide {
+  font-size: 0.75rem;
+  color: var(--pg-surface-500);
+  margin: 0;
+}
+
+.erreur-champ {
+  color: var(--pg-error);
+  font-size: 0.8125rem;
+  margin: 0;
+}
+
+.btn-submit {
+  width: 100%;
+  padding: 13px var(--pg-space-lg);
+  background: var(--pg-primary-600);
+  color: white;
+  border: none;
+  border-radius: var(--pg-radius-md);
+  font: inherit;
+  font-weight: 600;
+  font-size: 0.9375rem;
+  cursor: pointer;
+  transition: background 0.2s ease;
+
+  &:hover:not(:disabled) {
+    background: var(--pg-primary-700);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--pg-primary-500);
+    outline-offset: 2px;
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+}
+
+.succes {
+  color: var(--pg-success);
+  font-weight: 500;
+  margin: 0;
+}
+
+// Information importante à ne pas manquer (ex. un changement de zone remet la fiche en attente)
+.alerte {
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  color: var(--pg-surface-700);
+  background: var(--pg-surface-50);
+  border: 1px solid var(--pg-surface-200);
+  border-left: 3px solid var(--pg-accent-gold);
+  border-radius: var(--pg-radius-md);
+  padding: var(--pg-space-sm) var(--pg-space-md);
+  margin: 0;
+}
+
+@media (max-width: 760px) {
+  .carte-formulaire {
+    padding: var(--pg-space-lg);
+  }
+
+  .champ-groupe {
+    grid-template-columns: 1fr;
+  }
+}
