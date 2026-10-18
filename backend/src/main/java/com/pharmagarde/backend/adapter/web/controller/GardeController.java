@@ -36,7 +36,7 @@ public class GardeController {
     // GET /api/gardes : liste les périodes déjà déclarées par la pharmacie du pharmacien connecté
     @GetMapping
     public List<GardeResponse> listMesGardes(@AuthenticationPrincipal JwtUserDetails principal) {
-        return gardeService.listMesGardes(principal);
+        return gardeService.listMesGardes(principal.versUtilisateurConnecte());
     }
 
     // POST /api/gardes : déclare une nouvelle période de garde
@@ -44,7 +44,7 @@ public class GardeController {
     @ResponseStatus(HttpStatus.CREATED)
     public GardeResponse declarerGarde(@Valid @RequestBody GardeRequest request,
                                         @AuthenticationPrincipal JwtUserDetails principal) {
-        return gardeService.declarerGarde(request, principal);
+        return gardeService.declarerGarde(request, principal.versUtilisateurConnecte());
     }
 
     // PUT /api/gardes/{id} : modifie une période de garde existante
@@ -52,7 +52,7 @@ public class GardeController {
     public GardeResponse modifierGarde(@PathVariable Long id,
                                         @Valid @RequestBody GardeRequest request,
                                         @AuthenticationPrincipal JwtUserDetails principal) {
-        return gardeService.modifierGarde(id, request, principal);
+        return gardeService.modifierGarde(id, request, principal.versUtilisateurConnecte());
     }
 
     // DELETE /api/gardes/{id} : supprime une période de garde
@@ -60,6 +60,6 @@ public class GardeController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void supprimerGarde(@PathVariable Long id,
                                 @AuthenticationPrincipal JwtUserDetails principal) {
-        gardeService.supprimerGarde(id, principal);
+        gardeService.supprimerGarde(id, principal.versUtilisateurConnecte());
     }
 }

@@ -3,27 +3,27 @@ package com.pharmagarde.backend.application.service;
 import com.pharmagarde.backend.application.dto.PharmacieRequest;
 import com.pharmagarde.backend.application.dto.PharmacieResponse;
 import com.pharmagarde.backend.application.dto.ValidationRequest;
+import com.pharmagarde.backend.application.support.LibellesReferentiel;
 import com.pharmagarde.backend.domain.enums.Role;
+import com.pharmagarde.backend.domain.exception.AccesRefuseException;
+import com.pharmagarde.backend.domain.exception.DonneeInvalideException;
+import com.pharmagarde.backend.domain.exception.RessourceIntrouvableException;
 import com.pharmagarde.backend.domain.model.Pharmacie;
-import com.pharmagarde.backend.infrastructure.persistence.entity.PharmacieEntity;
-import com.pharmagarde.backend.infrastructure.persistence.entity.QuartierEntity;
-import com.pharmagarde.backend.infrastructure.persistence.entity.UserEntity;
-import com.pharmagarde.backend.infrastructure.persistence.entity.ZoneEntity;
-import com.pharmagarde.backend.infrastructure.persistence.mapper.PharmacieMapper;
-import com.pharmagarde.backend.infrastructure.persistence.repository.GardeRepository;
-import com.pharmagarde.backend.infrastructure.persistence.repository.PharmacieRepository;
-import com.pharmagarde.backend.infrastructure.persistence.repository.QuartierRepository;
-import com.pharmagarde.backend.infrastructure.persistence.repository.UserRepository;
-import com.pharmagarde.backend.infrastructure.security.JwtUserDetails;
+import com.pharmagarde.backend.domain.model.Quartier;
+import com.pharmagarde.backend.domain.model.User;
+import com.pharmagarde.backend.domain.model.UtilisateurConnecte;
+import com.pharmagarde.backend.domain.port.out.GardeRepositoryPort;
+import com.pharmagarde.backend.domain.port.out.PharmacieRepositoryPort;
+import com.pharmagarde.backend.domain.port.out.ReferentielRepositoryPort;
+import com.pharmagarde.backend.domain.port.out.UtilisateurRepositoryPort;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Contient toute la logique métier liée à la gestion de la fiche pharmacie :
@@ -35,207 +35,176 @@ public class PharmacieService {
 
     private static final Logger log = LoggerFactory.getLogger(PharmacieService.class);
 
-    private final PharmacieRepository pharmacieRepository;
-    private final QuartierRepository quartierRepository;
-    private final UserRepository userRepository;
-    private final GardeRepository gardeRepository;
+    private final PharmacieRepositoryPort pharmacies;
+    private final ReferentielRepositoryPort referentiel;
+    private final UtilisateurRepositoryPort utilisateurs;
+    private final GardeRepositoryPort gardes;
 
-    // Injection par constructeur : Spring fournit automatiquement ces repositories
-    // quand il crée le service (pas besoin d'un "new" manuel quelque part)
-    public PharmacieService(PharmacieRepository pharmacieRepository,
-                             QuartierRepository quartierRepository,
-                             UserRepository userRepository,
-                             GardeRepository gardeRepository) {
-        this.pharmacieRepository = pharmacieRepository;
-        this.quartierRepository = quartierRepository;
-        this.userRepository = userRepository;
-        this.gardeRepository = gardeRepository;
+    // Injection par constructeur : Spring fournit l'implémentation de chaque port
+    // (les adaptateurs JPA de la couche infrastructure), le service n'en connaît que l'interface.
+    public PharmacieService(PharmacieRepositoryPort pharmacies,
+                            ReferentielRepositoryPort referentiel,
+                            UtilisateurRepositoryPort utilisateurs,
+                            GardeRepositoryPort gardes) {
+        this.pharmacies = pharmacies;
+        this.referentiel = referentiel;
+        this.utilisateurs = utilisateurs;
+        this.gardes = gardes;
     }
 
-    // Point d'entrée utilisé par le controller : l'identité du pharmacien vient de son JWT.
-    public PharmacieResponse upsertPharmacie(PharmacieRequest request, JwtUserDetails principal) {
-        return upsertPharmacieDeUtilisateur(request, principal.userId());
+    // Point d'entrée utilisé par le controller : l'identité du pharmacien vient de son jeton.
+    public PharmacieResponse upsertPharmacie(PharmacieRequest request, UtilisateurConnecte utilisateur) {
+        return upsertPharmacieDeUtilisateur(request, utilisateur.userId());
     }
 
     // Crée la fiche pharmacie de l'utilisateur donné si elle n'existe pas, sinon la met à jour.
-    // Prend un simple userId (et non le JWT) pour être aussi réutilisable à l'inscription,
-    // moment où le JWT n'existe pas encore.
+    // Prend un simple userId pour être aussi réutilisable à l'inscription, moment où le jeton
+    // n'existe pas encore.
     public PharmacieResponse upsertPharmacieDeUtilisateur(PharmacieRequest request, Long userId) {
 
-        // 1. On va chercher le quartier choisi par le pharmacien.
-        // orElseThrow(...) : si aucun quartier ne correspond à cet id, on arrête tout de suite
-        // avec une erreur claire, plutôt que de continuer avec une donnée manquante.
-        QuartierEntity quartier = quartierRepository.findById(request.quartierId())
-                .orElseThrow(() -> new IllegalArgumentException("Quartier introuvable : " + request.quartierId()));
+        // 1. Le quartier choisi doit exister ; la zone s'en déduit (jamais saisie par le client)
+        Quartier quartier = referentiel.trouverQuartier(request.quartierId())
+                .orElseThrow(() -> new RessourceIntrouvableException("Quartier introuvable : " + request.quartierId()));
+        Long zoneId = quartier.getZoneId();
 
-        // 2. La zone se déduit automatiquement du quartier (pas besoin que le pharmacien la précise)
-        ZoneEntity zone = quartier.getZone();
+        // 2. Ce pharmacien a-t-il déjà une fiche ?
+        Optional<Pharmacie> existante = pharmacies.trouverParTenant(userId);
 
-        // 3. On vérifie si ce pharmacien a déjà une fiche.
-        // findByTenantUserId renvoie une List (potentiellement vide) : on prend le 1er élément s'il existe.
-        List<PharmacieEntity> pharmaciesExistantes = pharmacieRepository.findByTenantUserId(userId);
-
-        PharmacieEntity entity;
-        if (!pharmaciesExistantes.isEmpty()) {
-            entity = pharmaciesExistantes.get(0);
+        Pharmacie pharmacie;
+        if (existante.isPresent()) {
+            pharmacie = existante.get();
 
             // Deux changements font tomber la validation, parce qu'ils portent sur ce que le
             // superviseur a contrôlé : la zone (RG-11) et le numéro d'agrément (RG-16).
-            boolean changementDeZone = !zone.getId().equals(entity.getZone().getId());
+            boolean changementDeZone = !zoneId.equals(pharmacie.getZoneId());
 
             // RG-16 : un numéro d'agrément différent de l'actuel le remplace, mais la fiche
-            // repasse en attente : le superviseur doit revérifier le nouveau numéro. Un numéro
-            // vide ou identique (à la casse près) ne change rien.
+            // repasse en attente. Un numéro vide ou identique (à la casse près) ne change rien.
             String nouveauNumero = request.numeroAgrementOrdre() == null ? "" : request.numeroAgrementOrdre().trim();
             boolean changementDAgrement = !nouveauNumero.isEmpty()
-                    && !nouveauNumero.equalsIgnoreCase(entity.getNumeroAgrementOrdre());
+                    && !nouveauNumero.equalsIgnoreCase(pharmacie.getNumeroAgrementOrdre());
 
             if (changementDeZone || changementDAgrement) {
-                entity.setActive(false);
-                entity.setValideParUser(null);
-                entity.setValideLe(null);
+                remettreEnAttente(pharmacie);
             }
 
             if (changementDAgrement) {
                 // Aucune table d'historique : cette ligne est la seule trace du remplacement
                 log.info("Numéro d'agrément modifié : pharmacie id={}, ancien='{}', nouveau='{}' ; fiche remise en attente",
-                        entity.getId(), pourLog(entity.getNumeroAgrementOrdre()), pourLog(nouveauNumero));
-                entity.setNumeroAgrementOrdre(nouveauNumero);
+                        pharmacie.getId(), pourLog(pharmacie.getNumeroAgrementOrdre()), pourLog(nouveauNumero));
+                pharmacie.setNumeroAgrementOrdre(nouveauNumero);
             }
-
-            entity.setNom(request.nom());
-            entity.setAdresse(request.adresse());
-            entity.setQuartier(quartier);
-            entity.setZone(zone);
-            entity.setLatitude(request.latitude());
-            entity.setLongitude(request.longitude());
-            entity.setTelephone(request.telephone());
-            entity.setHoraireOuverture(request.horaireOuverture());
-            entity.setHoraireFermeture(request.horaireFermeture());
         } else {
             // Création : le numéro d'agrément est obligatoire (preuve déclarative d'exercice
-            // légal). PharmacieRequest ne le valide pas lui-même, puisqu'une mise à jour n'a pas
-            // à le renvoyer : c'est donc ici, à la création, qu'on l'exige.
+            // légal). PharmacieRequest ne l'exige pas, puisqu'une mise à jour n'a pas à le renvoyer.
             String numeroAgrement = request.numeroAgrementOrdre();
             if (numeroAgrement == null || numeroAgrement.isBlank()) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                        "Le numéro d'agrément est obligatoire à la création de la fiche");
+                throw new DonneeInvalideException("Le numéro d'agrément est obligatoire à la création de la fiche");
             }
 
             // Nouvelle fiche, inactive par défaut (en attente de validation)
-            UserEntity tenantUser = userRepository.findById(userId)
-                    .orElseThrow(() -> new IllegalArgumentException("Utilisateur introuvable : " + userId));
-
-            entity = new PharmacieEntity();
-            entity.setNom(request.nom());
-            entity.setAdresse(request.adresse());
-            entity.setQuartier(quartier);
-            entity.setZone(zone);
-            entity.setLatitude(request.latitude());
-            entity.setLongitude(request.longitude());
-            entity.setTelephone(request.telephone());
-            entity.setHoraireOuverture(request.horaireOuverture());
-            entity.setHoraireFermeture(request.horaireFermeture());
-            entity.setActive(false);
-            entity.setTenantUser(tenantUser);
-            entity.setNumeroAgrementOrdre(numeroAgrement.trim());
+            pharmacie = new Pharmacie();
+            pharmacie.setActive(false);
+            pharmacie.setTenantUserId(userId);
+            pharmacie.setNumeroAgrementOrdre(numeroAgrement.trim());
         }
 
-        // 4. Sauvegarde en base (save() fait un INSERT si l'id est vide, un UPDATE sinon)
-        PharmacieEntity sauvegardee = pharmacieRepository.save(entity);
+        pharmacie.setNom(request.nom());
+        pharmacie.setAdresse(request.adresse());
+        pharmacie.setQuartierId(quartier.getId());
+        pharmacie.setZoneId(zoneId);
+        pharmacie.setLatitude(request.latitude());
+        pharmacie.setLongitude(request.longitude());
+        pharmacie.setTelephone(request.telephone());
+        pharmacie.setHoraireOuverture(request.horaireOuverture());
+        pharmacie.setHoraireFermeture(request.horaireFermeture());
 
-        // 5. On transforme la fiche en réponse pour le frontend
-        return versReponse(sauvegardee);
+        return versReponse(pharmacies.enregistrer(pharmacie), LibellesReferentiel.charger(referentiel));
     }
 
     // Liste les pharmacies visibles pour la personne connectée, selon son rôle (RG-01 / RG-02)
-    public List<PharmacieResponse> listPharmacies(JwtUserDetails principal) {
-        List<PharmacieEntity> entities;
+    public List<PharmacieResponse> listPharmacies(UtilisateurConnecte utilisateur) {
+        List<Pharmacie> visibles;
 
-        if ("PHARMACIEN".equals(principal.role())) {
+        if (utilisateur.estPharmacien()) {
             // RG-01 : le pharmacien ne voit que sa propre pharmacie
-            entities = pharmacieRepository.findByTenantUserId(principal.userId());
-
-        } else if ("SUPERVISEUR".equals(principal.role()) && principal.zoneId() != null) {
+            visibles = pharmacies.trouverParTenant(utilisateur.userId()).stream().toList();
+        } else if (utilisateur.estSuperviseurDeZone()) {
             // Superviseur de zone : uniquement les pharmacies de sa zone
-            entities = pharmacieRepository.findByZoneId(principal.zoneId());
-
+            visibles = pharmacies.listerParZone(utilisateur.zoneId());
         } else {
-            // Superviseur général (zoneId null) : toutes les pharmacies (RG-02)
-            entities = pharmacieRepository.findAll();
+            // Superviseur général (zone vide) : toutes les pharmacies (RG-02)
+            visibles = pharmacies.listerToutes();
         }
 
-        return entities.stream().map(this::versReponse).toList();
+        LibellesReferentiel libelles = LibellesReferentiel.charger(referentiel);
+        return visibles.stream().map(p -> versReponse(p, libelles)).toList();
     }
 
     // Valide ou refuse une pharmacie (superviseur uniquement), dans les limites de sa zone (RG-02)
-    public PharmacieResponse validerPharmacie(Long pharmacieId, ValidationRequest request, JwtUserDetails principal) {
-
-        PharmacieEntity entity = pharmacieRepository.findById(pharmacieId)
-                .orElseThrow(() -> new IllegalArgumentException("Pharmacie introuvable : " + pharmacieId));
-
-        controlerZoneDuSuperviseur(entity, principal, "valider");
+    public PharmacieResponse validerPharmacie(Long pharmacieId, ValidationRequest request, UtilisateurConnecte utilisateur) {
+        Pharmacie pharmacie = trouverPharmacie(pharmacieId);
+        controlerZoneDuSuperviseur(pharmacie, utilisateur, "valider");
 
         if (request.valide()) {
             // Validation : on active la fiche et on trace qui a validé, et quand.
-            UserEntity superviseur = userRepository.findById(principal.userId())
-                    .orElseThrow(() -> new IllegalArgumentException("Utilisateur introuvable : " + principal.userId()));
-            entity.setActive(true);
-            entity.setValideParUser(superviseur);
-            entity.setValideLe(LocalDateTime.now());
+            pharmacie.setActive(true);
+            pharmacie.setValideParUserId(utilisateur.userId());
+            pharmacie.setValideLe(LocalDateTime.now());
         } else {
-            // Refus : même reset que RG-11 (changement de zone), on revient à l'état "en attente".
-            entity.setActive(false);
-            entity.setValideParUser(null);
-            entity.setValideLe(null);
+            // Refus : même retour à l'état "en attente" que RG-11.
+            remettreEnAttente(pharmacie);
         }
 
-        PharmacieEntity sauvegardee = pharmacieRepository.save(entity);
-        return versReponse(sauvegardee);
+        return versReponse(pharmacies.enregistrer(pharmacie), LibellesReferentiel.charger(referentiel));
     }
 
     // RG-15 : un superviseur supprime définitivement une pharmacie (ex. un canular), avec son
     // planning de garde et le compte du pharmacien. Tout se fait dans une seule transaction :
     // si une étape échoue, rien n'est supprimé. Même portée que la validation (RG-02).
     @Transactional
-    public void supprimerPharmacie(Long pharmacieId, JwtUserDetails principal) {
+    public void supprimerPharmacie(Long pharmacieId, UtilisateurConnecte utilisateur) {
+        Pharmacie pharmacie = trouverPharmacie(pharmacieId);
+        controlerZoneDuSuperviseur(pharmacie, utilisateur, "supprimer");
 
-        PharmacieEntity pharmacie = pharmacieRepository.findById(pharmacieId)
-                .orElseThrow(() -> new IllegalArgumentException("Pharmacie introuvable : " + pharmacieId));
+        Optional<User> pharmacien = utilisateurs.trouverParId(pharmacie.getTenantUserId());
 
-        controlerZoneDuSuperviseur(pharmacie, principal, "supprimer");
-
-        UserEntity pharmacien = pharmacie.getTenantUser();
-
-        // Ordre imposé par les clés étrangères : le planning dépend de la fiche, et la fiche
-        // dépend du compte. flush() envoie les suppressions à la base avant de toucher au compte.
-        gardeRepository.deleteByPharmacieId(pharmacieId);
-        pharmacieRepository.delete(pharmacie);
-        pharmacieRepository.flush();
+        // Ordre imposé par les clés étrangères : le planning dépend de la fiche, la fiche du compte.
+        gardes.supprimerParPharmacie(pharmacieId);
+        pharmacies.supprimer(pharmacieId);
 
         // Le compte n'est supprimé que s'il est bien celui d'un pharmacien : cette route ne doit
         // jamais pouvoir effacer un compte superviseur ou admin, même si les données étaient incohérentes.
         String compte = "conservé (ce n'est pas un compte pharmacien)";
-        if (pharmacien != null && pharmacien.getRole() == Role.PHARMACIEN) {
-            compte = "supprimé, id=" + pharmacien.getId() + ", email=" + pourLog(pharmacien.getEmail());
-            userRepository.delete(pharmacien);
+        if (pharmacien.isPresent() && pharmacien.get().getRole() == Role.PHARMACIEN) {
+            compte = "supprimé, id=" + pharmacien.get().getId() + ", email=" + pourLog(pharmacien.get().getEmail());
+            utilisateurs.supprimer(pharmacien.get().getId());
         }
 
         // Aucune table d'historique : cette ligne est la seule trace de la suppression
         log.warn("Pharmacie supprimée : id={}, nom='{}', agrément='{}' ; compte {} ; par le superviseur id={}",
                 pharmacieId, pourLog(pharmacie.getNom()), pourLog(pharmacie.getNumeroAgrementOrdre()),
-                compte, principal.userId());
+                compte, utilisateur.userId());
     }
 
-    // RG-02 : un superviseur de zone (zoneId renseigné) ne peut agir que sur les pharmacies de sa
-    // propre zone ; le superviseur général (zoneId == null) peut agir sur toutes. 403 explicite :
-    // la pharmacie existe bel et bien, l'action est simplement refusée (pas de 404, décision S4).
-    private void controlerZoneDuSuperviseur(PharmacieEntity pharmacie, JwtUserDetails principal, String action) {
-        boolean estSuperviseurDeZone = principal.zoneId() != null;
-        boolean horsDeSaZone = !pharmacie.getZone().getId().equals(principal.zoneId());
-        if (estSuperviseurDeZone && horsDeSaZone) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN,
-                    "Vous ne pouvez " + action + " que les pharmacies de votre zone");
+    private Pharmacie trouverPharmacie(Long pharmacieId) {
+        return pharmacies.trouverParId(pharmacieId)
+                .orElseThrow(() -> new RessourceIntrouvableException("Pharmacie introuvable : " + pharmacieId));
+    }
+
+    // État "en attente" : fiche invisible du public, sans trace de validation (RG-11, RG-16, refus)
+    private void remettreEnAttente(Pharmacie pharmacie) {
+        pharmacie.setActive(false);
+        pharmacie.setValideParUserId(null);
+        pharmacie.setValideLe(null);
+    }
+
+    // RG-02 : un superviseur de zone ne peut agir que sur les pharmacies de sa propre zone ; le
+    // superviseur général peut agir sur toutes. 403 explicite : la pharmacie existe bel et bien,
+    // l'action est simplement refusée (pas de 404, décision S4).
+    private void controlerZoneDuSuperviseur(Pharmacie pharmacie, UtilisateurConnecte utilisateur, String action) {
+        if (utilisateur.estSuperviseurDeZone() && !pharmacie.getZoneId().equals(utilisateur.zoneId())) {
+            throw new AccesRefuseException("Vous ne pouvez " + action + " que les pharmacies de votre zone");
         }
     }
 
@@ -245,23 +214,17 @@ public class PharmacieService {
         return texte == null ? "" : texte.replaceAll("[\\r\\n]", "_");
     }
 
-    // Construit la réponse renvoyée au frontend à partir d'une fiche : le domaine fournit les
-    // champs simples, et on y ajoute ce qu'il n'a pas (noms de quartier et de zone, infos de
-    // validation, numéro d'agrément). Un seul endroit pour les trois routes qui répondent
-    // avec une pharmacie (upsert, liste, validation).
-    private PharmacieResponse versReponse(PharmacieEntity e) {
-        Pharmacie p = PharmacieMapper.toDomain(e);
-        Long valideParUserId = e.getValideParUser() != null ? e.getValideParUser().getId() : null;
-
+    // Construit la réponse renvoyée au frontend : le domaine fournit les champs, l'index du
+    // référentiel les noms de quartier et de zone. Un seul endroit pour toutes les routes.
+    private PharmacieResponse versReponse(Pharmacie p, LibellesReferentiel libelles) {
         return new PharmacieResponse(
                 p.getId(), p.getNom(), p.getAdresse(),
-                p.getQuartierId(), e.getQuartier().getNom(),
-                p.getZoneId(), e.getZone().getNom(),
+                p.getQuartierId(), libelles.nomQuartier(p.getQuartierId()),
+                p.getZoneId(), libelles.nomZone(p.getZoneId()),
                 p.getLatitude(), p.getLongitude(), p.getTelephone(),
                 p.getHoraireOuverture(), p.getHoraireFermeture(),
                 p.isActive(), p.getTenantUserId(),
-                valideParUserId, e.getValideLe(),
-                e.getNumeroAgrementOrdre()
-        );
+                p.getValideParUserId(), p.getValideLe(),
+                p.getNumeroAgrementOrdre());
     }
 }
