@@ -1,5 +1,12 @@
 package com.pharmagarde.backend.adapter.web.advice;
 
+import com.pharmagarde.backend.domain.exception.AccesRefuseException;
+import com.pharmagarde.backend.domain.exception.AuthentificationEchoueeException;
+import com.pharmagarde.backend.domain.exception.ConflitMetierException;
+import com.pharmagarde.backend.domain.exception.DonneeInvalideException;
+import com.pharmagarde.backend.domain.exception.ExceptionMetier;
+import com.pharmagarde.backend.domain.exception.RessourceIntrouvableException;
+import com.pharmagarde.backend.domain.exception.ServiceIndisponibleException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.TypeMismatchException;
@@ -36,6 +43,23 @@ public class GlobalExceptionHandler {
     public ResponseEntity<Map<String, Object>> gererAuthenticationException(AuthenticationException ex) {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                 .body(corpsErreur(HttpStatus.UNAUTHORIZED.value(), "Email ou mot de passe incorrect"));
+    }
+
+    // Erreurs métier du domaine : le domaine ne connaît pas HTTP, c'est ici, dans la couche
+    // adapter, que chaque sorte d'erreur reçoit son code. Le message, rédigé par le service
+    // pour l'utilisateur, est renvoyé tel quel.
+    @ExceptionHandler(ExceptionMetier.class)
+    public ResponseEntity<Map<String, Object>> gererExceptionMetier(ExceptionMetier ex) {
+        HttpStatus statut = switch (ex) {
+            case RessourceIntrouvableException e -> HttpStatus.NOT_FOUND;
+            case AccesRefuseException e -> HttpStatus.FORBIDDEN;
+            case ConflitMetierException e -> HttpStatus.CONFLICT;
+            case DonneeInvalideException e -> HttpStatus.BAD_REQUEST;
+            case AuthentificationEchoueeException e -> HttpStatus.UNAUTHORIZED;
+            case ServiceIndisponibleException e -> HttpStatus.SERVICE_UNAVAILABLE;
+            default -> HttpStatus.BAD_REQUEST;
+        };
+        return reponse(statut, ex.getMessage());
     }
 
     // Exceptions métier levées volontairement avec un code HTTP précis

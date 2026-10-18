@@ -1,9 +1,11 @@
 package com.pharmagarde.backend.application.service;
 
 import com.pharmagarde.backend.application.dto.PharmaciePubliqueResponse;
-import com.pharmagarde.backend.infrastructure.persistence.entity.PharmacieEntity;
-import com.pharmagarde.backend.infrastructure.persistence.repository.PharmacieRepository;
-import com.pharmagarde.backend.infrastructure.persistence.repository.QuartierRepository;
+import com.pharmagarde.backend.application.support.LibellesReferentiel;
+import com.pharmagarde.backend.domain.exception.RessourceIntrouvableException;
+import com.pharmagarde.backend.domain.model.Pharmacie;
+import com.pharmagarde.backend.domain.port.out.PharmacieRepositoryPort;
+import com.pharmagarde.backend.domain.port.out.ReferentielRepositoryPort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -17,49 +19,40 @@ import java.util.List;
 @Service
 public class PharmacieRechercheService {
 
-    private final PharmacieRepository pharmacieRepository;
-    private final QuartierRepository quartierRepository;
+    private final PharmacieRepositoryPort pharmacies;
+    private final ReferentielRepositoryPort referentiel;
 
-    public PharmacieRechercheService(PharmacieRepository pharmacieRepository,
-                                      QuartierRepository quartierRepository) {
-        this.pharmacieRepository = pharmacieRepository;
-        this.quartierRepository = quartierRepository;
+    public PharmacieRechercheService(PharmacieRepositoryPort pharmacies, ReferentielRepositoryPort referentiel) {
+        this.pharmacies = pharmacies;
+        this.referentiel = referentiel;
     }
 
     // Sans quartier : toutes les pharmacies actives. Avec quartier : uniquement celles de ce quartier.
-    // readOnly = true : la base est ouverte en lecture seule le temps de la méthode, ce qui permet
-    // aussi de lire le nom du quartier et de la zone (chargés à la demande) sans erreur.
     @Transactional(readOnly = true)
     public List<PharmaciePubliqueResponse> rechercher(Long quartierId) {
-        List<PharmacieEntity> pharmacies;
+        List<Pharmacie> resultats;
 
         if (quartierId == null) {
-            pharmacies = pharmacieRepository.findByActiveTrueOrderByNomAsc();
+            resultats = pharmacies.listerActives();
         } else {
             // Un quartier qui n'existe pas est une erreur (404) ; un quartier existant
             // sans aucune pharmacie active renvoie simplement une liste vide.
-            if (!quartierRepository.existsById(quartierId)) {
-                throw new IllegalArgumentException("Quartier introuvable : " + quartierId);
+            if (!referentiel.quartierExiste(quartierId)) {
+                throw new RessourceIntrouvableException("Quartier introuvable : " + quartierId);
             }
-            pharmacies = pharmacieRepository.findByQuartierIdAndActiveTrueOrderByNomAsc(quartierId);
+            resultats = pharmacies.listerActivesParQuartier(quartierId);
         }
 
-        return pharmacies.stream().map(this::versReponse).toList();
+        LibellesReferentiel libelles = LibellesReferentiel.charger(referentiel);
+        return resultats.stream().map(p -> versReponse(p, libelles)).toList();
     }
 
-    // Transforme une entité en réponse publique (sans aucun champ interne)
-    private PharmaciePubliqueResponse versReponse(PharmacieEntity p) {
+    // Transforme une pharmacie en réponse publique (sans aucun champ interne)
+    private PharmaciePubliqueResponse versReponse(Pharmacie p, LibellesReferentiel libelles) {
         return new PharmaciePubliqueResponse(
-                p.getId(),
-                p.getNom(),
-                p.getAdresse(),
-                p.getQuartier().getNom(),
-                p.getZone().getNom(),
-                p.getLatitude(),
-                p.getLongitude(),
-                p.getTelephone(),
-                p.getHoraireOuverture(),
-                p.getHoraireFermeture()
-        );
+                p.getId(), p.getNom(), p.getAdresse(),
+                libelles.nomQuartier(p.getQuartierId()), libelles.nomZone(p.getZoneId()),
+                p.getLatitude(), p.getLongitude(), p.getTelephone(),
+                p.getHoraireOuverture(), p.getHoraireFermeture());
     }
 }

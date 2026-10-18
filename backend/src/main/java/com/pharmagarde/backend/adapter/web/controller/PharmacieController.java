@@ -31,13 +31,13 @@ public class PharmacieController {
     @PostMapping
     public PharmacieResponse upsertPharmacie(@Valid @RequestBody PharmacieRequest request,
                                               @AuthenticationPrincipal JwtUserDetails principal) {
-        return pharmacieService.upsertPharmacie(request, principal);
+        return pharmacieService.upsertPharmacie(request, principal.versUtilisateurConnecte());
     }
 
     // GET /api/pharmacies : liste scopée selon le rôle (voir PharmacieService.listPharmacies)
     @GetMapping
     public List<PharmacieResponse> listPharmacies(@AuthenticationPrincipal JwtUserDetails principal) {
-        return pharmacieService.listPharmacies(principal);
+        return pharmacieService.listPharmacies(principal.versUtilisateurConnecte());
     }
 
     // PATCH /api/pharmacies/{id}/validation : un superviseur valide ou refuse une pharmacie
@@ -45,7 +45,7 @@ public class PharmacieController {
     public PharmacieResponse validerPharmacie(@PathVariable Long id,
                                                @Valid @RequestBody ValidationRequest request,
                                                @AuthenticationPrincipal JwtUserDetails principal) {
-        return pharmacieService.validerPharmacie(id, request, principal);
+        return pharmacieService.validerPharmacie(id, request, principal.versUtilisateurConnecte());
     }
 
     // DELETE /api/pharmacies/{id} : un superviseur supprime définitivement une pharmacie, son
@@ -54,6 +54,6 @@ public class PharmacieController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void supprimerPharmacie(@PathVariable Long id,
                                     @AuthenticationPrincipal JwtUserDetails principal) {
-        pharmacieService.supprimerPharmacie(id, principal);
+        pharmacieService.supprimerPharmacie(id, principal.versUtilisateurConnecte());
     }
 }
